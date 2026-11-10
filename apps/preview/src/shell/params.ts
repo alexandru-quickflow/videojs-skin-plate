@@ -17,6 +17,24 @@ export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 export const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 export type Theme = (typeof THEMES)[number];
 
+/** What the preview plays: the trailer with chapters, the edge cases, and a stream that fails. */
+export const SOURCES = ['chapters', 'one-chapter', 'no-chapters', 'error'] as const;
+export type Source = (typeof SOURCES)[number];
+
+export const INDEX_PLACES = ['end', 'start', 'none'] as const;
+export type IndexPlace = (typeof INDEX_PLACES)[number];
+
+export const RULERS = ['dense', 'sparse'] as const;
+export type Ruler = (typeof RULERS)[number];
+
+/** Widths where Plate's layout changes: phone keys, chapter strip, the full row with Quality. */
+export const WIDTH_PRESETS = [
+  { label: 'Phone', width: 375 },
+  { label: 'Tablet', width: 768 },
+  { label: 'Laptop', width: 1120 },
+  { label: 'Wide', width: 1360 },
+] as const;
+
 export const PRELOAD_VALUES = ['auto', 'metadata', 'none'] as const;
 export type PreloadValue = (typeof PRELOAD_VALUES)[number];
 
@@ -32,11 +50,25 @@ export interface WorkbenchParams {
   dir: TextDirection;
   locale: Locale;
   theme: Theme;
+  source: Source;
+  /** Plate's public properties; empty means the theme's own. */
+  accent: string;
+  playhead: string;
+  radius: string;
+  number: string;
+  playingWord: string;
+  index: IndexPlace;
+  ruler: Ruler;
+  head: boolean;
   autoplay: boolean;
   muted: boolean;
   loop: boolean;
   preload: PreloadValue;
 }
+
+const HEX = /^#[0-9a-f]{6}$/i;
+const hex = (value: string | null) => (value && HEX.test(value) ? value.toLowerCase() : '');
+const text = (value: string | null, max: number) => (value ?? '').slice(0, max);
 
 function oneOf<const Values extends readonly string[]>(values: Values, value: string | null, fallback: Values[number]) {
   return values.includes(value ?? '') ? (value as Values[number]) : fallback;
@@ -54,6 +86,15 @@ export function readParams(query: string): WorkbenchParams {
     dir: oneOf(TEXT_DIRECTIONS, params.get('dir'), 'auto'),
     locale: oneOf(locales, params.get('locale'), 'en'),
     theme: oneOf(THEMES, params.get('theme'), 'night'),
+    source: oneOf(SOURCES, params.get('source'), 'chapters'),
+    accent: hex(params.get('accent')),
+    playhead: hex(params.get('playhead')),
+    radius: /^\d{1,2}$/.test(params.get('radius') ?? '') ? params.get('radius')! : '',
+    number: text(params.get('number'), 4),
+    playingWord: text(params.get('word'), 16),
+    index: oneOf(INDEX_PLACES, params.get('index'), 'end'),
+    ruler: oneOf(RULERS, params.get('ruler'), 'dense'),
+    head: params.get('head') !== '0',
     autoplay: flag('autoplay'),
     muted: flag('muted'),
     loop: flag('loop'),
@@ -71,6 +112,15 @@ export function writeParams(value: WorkbenchParams): string {
     dir: value.dir,
     locale: value.locale,
     theme: value.theme,
+    source: value.source,
+    accent: value.accent,
+    playhead: value.playhead,
+    radius: value.radius,
+    number: value.number,
+    word: value.playingWord,
+    index: value.index,
+    ruler: value.ruler,
+    head: flag(value.head),
     autoplay: flag(value.autoplay),
     muted: flag(value.muted),
     loop: flag(value.loop),
@@ -121,4 +171,56 @@ export function applyDocumentParams(value: WorkbenchParams): void {
   root.dir = value.dir === 'auto' ? localeDirection(value.locale) : value.dir;
   if (value.theme === 'night') delete root.dataset.plateTheme;
   else root.dataset.plateTheme = value.theme;
+
+  // The public properties, on the page as a site would set them; the player inherits them.
+  const set = (name: string, v: string) => (v ? root.style.setProperty(name, v) : root.style.removeProperty(name));
+  set('--plate-accent', value.accent);
+  set('--plate-on-accent', value.accent ? onAccent(value.accent) : '');
+  set('--plate-playhead', value.playhead);
+  set('--plate-radius', value.radius ? `${value.radius}px` : '');
+  set('--plate-number', value.number ? cssString(value.number) : '');
+  set('--plate-word-playing', value.playingWord ? cssString(value.playingWord) : '');
+}
+
+/** The skin's layout switches, on its container. */
+export function applySkinParams(container: HTMLElement, value: WorkbenchParams): void {
+  if (value.index === 'end') delete container.dataset.index;
+  else container.dataset.index = value.index;
+  if (value.ruler === 'sparse') container.dataset.ruler = 'sparse';
+  else delete container.dataset.ruler;
+  if (value.head) delete container.dataset.head;
+  else container.dataset.head = 'none';
+}
+
+/** A CSS string for `content`. */
+export const cssString = (value: string) => `"${value.replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ')}"`;
+
+/** Text on the accent: whichever of Plate's two inks reads better on it (WCAG contrast). */
+export function onAccent(hexColor: string): string {
+  const n = parseInt(hexColor.slice(1), 16);
+  const lin = (c: number) => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  const l = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  const dark = (l + 0.05) / (0.0094 + 0.05);
+  const light = 1.05 / (l + 0.05);
+  return dark >= light ? '#04171a' : '#ffffff';
+}
+
+/** The `mountPlate` call for the current settings, the way a site would write it. */
+export function codeSnippet(value: WorkbenchParams): string {
+  const lines: string[] = [`  src: 'https://stream.mux.com/PLAYBACK_ID.m3u8',`, `  chapters: '/chapters.vtt',`];
+  if (value.theme !== 'night') lines.push(`  theme: '${value.theme}',`);
+  if (value.index !== 'end') lines.push(`  index: '${value.index}',`);
+  if (value.ruler !== 'dense') lines.push(`  ruler: '${value.ruler}',`);
+  if (!value.head) lines.push('  head: false,');
+  if (value.number) lines.push(`  number: ${JSON.stringify(value.number)},`);
+  if (value.playingWord) lines.push(`  words: { playing: ${JSON.stringify(value.playingWord)} },`);
+  const style: string[] = [];
+  if (value.accent) style.push(`'--plate-accent': '${value.accent}'`, `'--plate-on-accent': '${onAccent(value.accent)}'`);
+  if (value.playhead) style.push(`'--plate-playhead': '${value.playhead}'`);
+  if (value.radius) style.push(`'--plate-radius': '${value.radius}px'`);
+  if (style.length) lines.push(`  style: { ${style.join(', ')} },`);
+  return `const { mountPlate } = await import('/plate/plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
 }

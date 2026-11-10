@@ -321,6 +321,7 @@
       --pl-w-loading: "Loading";
       --pl-w-ended: "Ended";
       --pl-w-error: "Error";
+      --pl-w-detail: "Detail";
     }
 
     :scope:lang(de) {
@@ -330,6 +331,7 @@
       --pl-w-loading: "Lädt";
       --pl-w-ended: "Ende";
       --pl-w-error: "Fehler";
+      --pl-w-detail: "Detail";
     }
 
     :scope:lang(fr) {
@@ -339,6 +341,7 @@
       --pl-w-loading: "Chargement";
       --pl-w-ended: "Terminé";
       --pl-w-error: "Erreur";
+      --pl-w-detail: "Détail";
     }
 
     :scope:lang(es) {
@@ -348,6 +351,7 @@
       --pl-w-loading: "Cargando";
       --pl-w-ended: "Fin";
       --pl-w-error: "Error";
+      --pl-w-detail: "Detalle";
     }
 
     :scope:lang(ro) {
@@ -357,6 +361,7 @@
       --pl-w-loading: "Se încarcă";
       --pl-w-ended: "Gata";
       --pl-w-error: "Eroare";
+      --pl-w-detail: "Detaliu";
     }
 
     :scope:lang(ru) {
@@ -366,6 +371,7 @@
       --pl-w-loading: "Загрузка";
       --pl-w-ended: "Конец";
       --pl-w-error: "Ошибка";
+      --pl-w-detail: "Деталь";
     }
 
     :scope:lang(ar) {
@@ -375,6 +381,7 @@
       --pl-w-loading: "تحميل";
       --pl-w-ended: "انتهى";
       --pl-w-error: "خطأ";
+      --pl-w-detail: "تفصيل";
     }
 
     :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::after {
@@ -1015,24 +1022,41 @@
       outline-offset: 2px;
     }
 
+    /*
+     * The preview, drawn as a detail on a technical plate: "Detail" and the time above, the
+     * storyboard frame inside four crop marks, the chapter's name under it in the serif, and a
+     * leader line down to the point on the ruler it shows.
+     */
     .pl-time-slider-preview {
-      bottom: calc(100% + 18px);
+      --pl-detail-mark: color-mix(in srgb, var(--pl-paper) 55%, transparent);
+      bottom: calc(100% + 22px);
       z-index: 30;
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      justify-items: center;
       gap: 6px;
       width: min-content;
-      min-width: 120px;
-      max-width: min(200px, 50cqi);
-      padding: 6px;
-      overflow: hidden;
-      border: 1px solid var(--pl-line-strong);
-      border-radius: var(--pl-radius-sm);
-      background: var(--pl-raised);
+      min-width: 140px;
+      max-width: min(260px, 60cqi);
+      padding: 8px 8px 9px;
+      background: var(--pl-surface);
+      box-shadow: 0 0 0 1px var(--pl-line), 0 14px 30px rgb(0 0 0 / 0.4);
       pointer-events: none;
       opacity: 0;
       transition: opacity var(--media-duration-fast) ease-out;
+    }
+
+    /* The leader: a hairline in the accent from the detail to the ruler, ending in a dot. */
+    .pl-time-slider-preview::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(var(--pl-teal), var(--pl-teal)) top / 1px calc(100% - 5px) no-repeat,
+        radial-gradient(circle, var(--pl-teal) 2.5px, transparent 3px) bottom / 7px 7px no-repeat;
+      width: 7px;
+      translate: -50% 0;
     }
 
     .pl-time-slider[data-pointing] .pl-time-slider-preview,
@@ -1050,43 +1074,74 @@
       }
     }
 
+    /* The frame, inside crop marks like the picture's own. */
+    .pl-detail-frame {
+      order: 2;
+      display: grid;
+      place-items: center;
+      padding: 5px;
+      background:
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) top left / 9px 1px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) top left / 1px 9px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) top right / 9px 1px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) top right / 1px 9px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) bottom left / 9px 1px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) bottom left / 1px 9px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) bottom right / 9px 1px no-repeat,
+        linear-gradient(var(--pl-detail-mark), var(--pl-detail-mark)) bottom right / 1px 9px no-repeat;
+    }
+
+    /* Video.js scales the storyboard tile to fit these, so the detail draws it larger. */
     .pl-slider-thumbnail {
       display: block;
-      max-width: 100%;
+      min-width: 176px;
+      max-width: min(224px, 50cqi);
       overflow: hidden;
-      border-radius: 6px;
+      border-radius: 2px;
     }
 
     .pl-slider-thumbnail-image {
       display: block;
     }
 
+    /* The label's two parts go above and below the frame. */
     .pl-time-slider-preview-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      width: 100%;
-      min-width: 0;
-      padding: 0 4px 2px;
-      text-align: center;
+      display: contents;
     }
 
+    /* "Detail" and the time, as the head of the detail. */
     .pl-time-slider-value {
-      font-size: 12px;
+      order: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-inline: 2px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
       color: var(--pl-paper);
       font-variant-numeric: tabular-nums;
+      direction: ltr;
+    }
+
+    .pl-time-slider-value::before {
+      content: var(--plate-word-detail, var(--pl-w-detail, "Detail"));
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--pl-faint);
     }
 
     .pl-time-slider-chapter-title {
+      order: 3;
       display: -webkit-box;
       max-width: 100%;
       overflow: hidden;
+      padding-inline: 2px;
       font-family: var(--pl-serif);
       font-style: italic;
-      font-size: 14px;
+      font-weight: var(--pl-serif-weight, 300);
+      font-size: 15px;
       line-height: 1.2;
-      color: var(--pl-mute);
+      color: var(--pl-paper);
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
       line-clamp: 2;
@@ -1094,6 +1149,22 @@
 
     .pl-time-slider-chapter-title:empty {
       display: none;
+    }
+
+    /* It draws itself in: the frame settles from a slightly smaller detail. */
+    @media (prefers-reduced-motion: no-preference) {
+      .pl-time-slider-preview {
+        transform-origin: 50% 100%;
+        scale: 0.96;
+        transition:
+          opacity var(--media-duration-fast) ease-out,
+          scale var(--media-duration-fast) var(--pl-ease);
+      }
+
+      .pl-time-slider[data-pointing] .pl-time-slider-preview,
+      .pl-time-slider[data-dragging] .pl-time-slider-preview {
+        scale: 1;
+      }
     }
 
     /* ------------------------------------------------------------------ Foot: timecode and a caption line of controls */
