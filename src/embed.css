@@ -1,0 +1,5 @@
+/* Player elements only provide state; the skin inside them is the box that gets sized. */
+media-i18n,
+video-player {
+  display: contents;
+}
