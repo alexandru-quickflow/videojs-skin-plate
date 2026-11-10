@@ -119,6 +119,23 @@
 </media-volume-slider>
 </div>
 <span class="pl-sep" aria-hidden="true"></span>
+<!-- Quality: the stream's renditions, from Video.js. The menu binds to the key right before it,
+     and hides the key when the stream has one rendition or none. -->
+<button type="button" class="pl-btn pl-btn-quality">
+<span class="pl-btn-text"><span><media-text token="menu.quality">Quality</media-text> <span class="pl-quality-value" data-part="value"></span></span></span>
+</button>
+<media-menu side="top" align="end" class="pl-menu pl-quality-menu">
+<media-menu-content class="pl-menu-content">
+<media-quality-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+<span class="pl-menu-tier" data-part="tier"></span>
+</media-menu-radio-item>
+</template>
+</media-quality-radio-group>
+</media-menu-content>
+</media-menu>
 <media-playback-rate-button class="pl-btn pl-btn-speed">
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.speed">Speed</media-text></span>
 </media-playback-rate-button>

@@ -1107,7 +1107,7 @@
       min-width: 0;
     }
 
-    @container pl (width >= 800px) {
+    @container pl (width >= 880px) {
       .pl-foot {
         flex-wrap: nowrap;
       }
@@ -1524,6 +1524,137 @@
 
     .pl-more .pl-btn-text {
       justify-items: start;
+    }
+
+    /* ------------------------------------------------------------------ Quality menu */
+
+    /* The key shows the word and the rendition playing, in the quieter grey. */
+    .pl-quality-value {
+      color: var(--pl-faint);
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pl-quality-value:empty {
+      display: none;
+    }
+
+    /* The rendition in the key only when the row has room for it; the menu always shows it. */
+    @container pl (width < 1360px) {
+      .pl-quality-value {
+        display: none;
+      }
+    }
+
+    /* Until the row is that wide, Fullscreen is its corner glyph, as on phones. Its name stays. */
+    @container pl (600px <= width < 1360px) {
+      .pl-btn-full .pl-only-narrow {
+        display: grid;
+      }
+
+      .pl-btn-full .pl-btn-text {
+        display: none;
+      }
+
+      .pl-btn-full {
+        padding-inline: 0;
+        color: var(--pl-paper);
+      }
+
+      .pl-btn-full .pl-btn-glyph {
+        width: 18px;
+        height: 18px;
+      }
+
+      .pl-btn-full .pl-btn-glyph .pl-full-exit,
+      .pl-btn-full[data-fullscreen] .pl-btn-glyph .pl-full-enter {
+        display: block;
+        visibility: hidden;
+      }
+
+      .pl-btn-full[data-fullscreen] .pl-btn-glyph .pl-full-exit {
+        visibility: visible;
+      }
+    }
+
+    /* A rendition list is a choice made rarely: below 1120px, where the row is full, it is left to Auto. */
+    @container pl (width < 1120px) {
+      .pl-controls > .pl-btn-quality,
+      .pl-quality-menu {
+        display: none !important;
+      }
+    }
+
+    /* The menu: a small plate like More, one row per rendition. */
+    .pl-menu {
+      min-width: 168px;
+      padding: 6px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: var(--pl-radius-sm);
+      background: var(--pl-surface);
+      box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+      color: var(--pl-paper);
+    }
+
+    .pl-menu-content,
+    .pl-menu-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .pl-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 40px;
+      padding-inline: 12px 14px;
+      border-radius: calc(var(--pl-radius-sm) - 4px);
+      font-family: var(--pl-mono);
+      font-size: 11px;
+      font-weight: var(--pl-label-weight, 400);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pl-mute);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* A ruler tick marks the rendition in use, in the accent. */
+    .pl-menu-item::before {
+      content: "";
+      flex: none;
+      width: 2px;
+      height: 14px;
+      background: var(--pl-line-strong);
+    }
+
+    .pl-menu-item[aria-checked="true"] {
+      color: var(--pl-paper);
+    }
+
+    .pl-menu-item[aria-checked="true"]::before {
+      background: var(--pl-teal);
+    }
+
+    .pl-menu-item[data-highlighted] {
+      background: var(--pl-line-soft);
+      color: var(--pl-paper);
+    }
+
+    .pl-menu-item:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: -2px;
+    }
+
+    .pl-menu-tier {
+      margin-inline-start: auto;
+      color: var(--pl-faint);
+      letter-spacing: 0.08em;
+    }
+
+    .pl-menu-tier[hidden] {
+      display: none;
     }
 
     /* ------------------------------------------------------------------ Error dialog */
