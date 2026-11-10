@@ -1405,7 +1405,8 @@
       translate: -50% 0;
     }
 
-    /* Volume: the mute word plus a hairline slider. */
+    /* Volume: the mute word plus a small scale, drawn like the ruler: a tick every tenth, tall ones at
+       0, 50 and 100, a line for the level and a readout in percent while it moves. */
     .pl-volume {
       display: inline-flex;
       align-items: center;
@@ -1416,21 +1417,34 @@
       position: relative;
       display: flex;
       align-items: center;
-      width: clamp(48px, 7cqi, 80px);
+      width: clamp(56px, 7.5cqi, 88px);
       height: 44px;
-      /* Room for the thumb, which centres on the track's end at zero volume. */
-      margin-inline: 10px 8px;
+      /* Room for the level line at the scale's ends. */
+      margin-inline: 8px 6px;
       cursor: pointer;
       touch-action: none;
       direction: ltr;
     }
 
+    .pl-volume-scale {
+      position: absolute;
+      inset-inline: 0;
+      top: 14px;
+      height: 9px;
+      background:
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 0 0 / 1px 100% no-repeat,
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 50% 0 / 1px 100% no-repeat,
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 100% 0 / 1px 100% no-repeat,
+        repeating-linear-gradient(90deg, var(--pl-line-strong) 0 1px, transparent 1px 10%) 0 100% / calc(100% + 1px) 4px no-repeat;
+      pointer-events: none;
+    }
+
     .pl-volume-track {
       position: absolute;
       inset-inline: 0;
+      top: 25px;
       height: 2px;
       overflow: hidden;
-      border-radius: 99px;
       background: var(--pl-track);
     }
 
@@ -1442,21 +1456,56 @@
       background: var(--pl-paper);
     }
 
+    /* The level: a line across the scale, like the playhead on the ruler. */
     .pl-volume-thumb {
       position: absolute;
+      top: 11px;
       left: var(--media-slider-fill, 0%);
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+      width: 2px;
+      height: 19px;
+      border-radius: 1px;
       background: var(--pl-paper);
-      box-shadow: 0 0 0 3px var(--pl-surface);
+      box-shadow: 0 0 0 2px var(--pl-surface);
       transform: translateX(-50%);
       outline: none;
     }
 
     .pl-volume-thumb:focus-visible {
       outline: 2px solid var(--pl-teal);
-      outline-offset: 3px;
+      outline-offset: 4px;
+    }
+
+    /* The readout, above the level while the slider is used: VOL and the percent. */
+    .pl-volume-readout {
+      position: absolute;
+      bottom: calc(100% - 4px);
+      left: var(--media-slider-fill, 0%);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 4px 7px;
+      background: var(--pl-surface);
+      box-shadow: 0 0 0 1px var(--pl-line-strong);
+      font-family: var(--pl-mono);
+      font-size: 10.5px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      color: var(--pl-paper);
+      font-variant-numeric: tabular-nums;
+      translate: -50% 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--media-duration-fast) ease-out;
+    }
+
+    .pl-volume-readout::before {
+      content: "VOL";
+      letter-spacing: 0.16em;
+      color: var(--pl-faint);
+    }
+
+    .pl-volume-slider:is([data-dragging], [data-pointing], :has(:focus-visible)) .pl-volume-readout {
+      opacity: 1;
     }
 
     /* ------------------------------------------------------------------ Small players */
