@@ -1,0 +1,1357 @@
+/*
+ * Plate: a Video.js skin drawn like the diagram plates on quickflow.dev.
+ * A hairline plate holds the video, a chapter index that is also navigation, a ruler for a timeline and a
+ * caption line of controls. Controls never sit over the picture, so they read the same on any footage.
+ */
+
+@layer base.theme {
+  .media-skin.pl {
+    /* Public Video.js properties. */
+    --media-font-family: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+    --media-accent-color: #2bd4bd;
+    --media-video-border-radius: 10px;
+
+    /* Ground and print, the site's own tokens. Measured against the plate surface. */
+    --pl-ink: #04080b;
+    --pl-surface: #0c1013;
+    --pl-raised: #151a1c;
+    --pl-paper: #e9f2f0;
+    --pl-mute: rgb(233 242 240 / 0.7);
+    --pl-faint: rgb(233 242 240 / 0.56);
+    --pl-line: rgb(224 240 238 / 0.1);
+    --pl-line-strong: rgb(224 240 238 / 0.22);
+    --pl-line-soft: rgb(224 240 238 / 0.06);
+
+    /* Two saturated colours: teal is where you are, hot is the moving playhead. */
+    --pl-teal: var(--media-accent-color, #2bd4bd);
+    --pl-hot: #ff5f45;
+    --pl-on-teal: #04171a;
+
+    --pl-serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --pl-mono: var(--media-font-family);
+
+    --pl-radius: 16px;
+    --pl-radius-sm: 10px;
+    --pl-pad: clamp(12px, 2.4cqi, 24px);
+    --pl-gap: clamp(10px, 1.8cqi, 18px);
+    --pl-bezel: clamp(10px, 1.6cqi, 16px);
+    --pl-index-w: clamp(190px, 27cqi, 290px);
+    --pl-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@layer base.preferences {
+  @media (prefers-contrast: more) {
+    .media-skin.pl {
+      --pl-mute: rgb(233 242 240 / 0.9);
+      --pl-faint: rgb(233 242 240 / 0.8);
+      --pl-line: rgb(224 240 238 / 0.35);
+      --pl-line-strong: rgb(224 240 238 / 0.55);
+    }
+  }
+}
+
+@layer components {
+  @scope (.media-skin.pl) {
+    /* ------------------------------------------------------------------ Container and plate */
+
+    /* Any container ratio works: the plate keeps its own height and sits centred. */
+    :scope {
+      container: pl / inline-size;
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      width: 100%;
+      min-width: 0;
+      font-family: var(--pl-mono);
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--pl-paper);
+      background: transparent;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pl-plate {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pl-gap);
+      padding: var(--pl-pad);
+      border: 1px solid var(--pl-line-strong);
+      border-radius: var(--pl-radius);
+      background:
+        radial-gradient(60% 50% at 12% 0%, rgb(43 212 189 / 0.07), transparent 70%),
+        radial-gradient(40% 40% at 92% 8%, rgb(255 95 69 / 0.05), transparent 70%),
+        var(--pl-surface);
+      isolation: isolate;
+    }
+
+    /* The grain the site lays over its flat areas, so the plate is the same material. */
+    .pl-plate::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0.18;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    :scope:focus-visible .pl-plate {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 3px;
+    }
+
+    .pl-label,
+    .pl-head {
+      font-family: var(--pl-mono);
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--pl-faint);
+    }
+
+    /* ------------------------------------------------------------------ Head */
+
+    .pl-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      padding-bottom: calc(var(--pl-gap) * 0.75);
+      border-bottom: 1px solid var(--pl-line);
+    }
+
+    .pl-tag {
+      overflow: hidden;
+      min-width: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--pl-mute);
+    }
+
+    .pl-dot {
+      margin-inline: 4px;
+      color: var(--pl-faint);
+    }
+
+    .pl-media-title:not([data-visible]) {
+      display: inline;
+    }
+
+    .pl-status {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pl-status-word {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--pl-mute);
+    }
+
+    .pl-status-word::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pl-line-strong);
+    }
+
+    .pl-status-word::after {
+      content: var(--pl-w-ready);
+    }
+
+    :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word {
+      color: var(--pl-teal);
+    }
+
+    :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::before {
+      background: var(--pl-teal);
+      box-shadow: 0 0 8px rgb(43 212 189 / 0.6);
+    }
+
+    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word {
+      color: var(--pl-hot);
+    }
+
+    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word::before {
+      background: var(--pl-hot);
+    }
+
+    /* Status words, per language. Every state selector below has the same specificity: later states win. */
+    :scope {
+      --pl-w-ready: "Ready";
+      --pl-w-playing: "Playing";
+      --pl-w-paused: "Paused";
+      --pl-w-loading: "Loading";
+      --pl-w-ended: "Ended";
+      --pl-w-error: "Error";
+    }
+
+    :scope:lang(de) {
+      --pl-w-ready: "Bereit";
+      --pl-w-playing: "Läuft";
+      --pl-w-paused: "Pause";
+      --pl-w-loading: "Lädt";
+      --pl-w-ended: "Ende";
+      --pl-w-error: "Fehler";
+    }
+
+    :scope:lang(fr) {
+      --pl-w-ready: "Prêt";
+      --pl-w-playing: "Lecture";
+      --pl-w-paused: "Pause";
+      --pl-w-loading: "Chargement";
+      --pl-w-ended: "Terminé";
+      --pl-w-error: "Erreur";
+    }
+
+    :scope:lang(es) {
+      --pl-w-ready: "Listo";
+      --pl-w-playing: "Reproduciendo";
+      --pl-w-paused: "Pausa";
+      --pl-w-loading: "Cargando";
+      --pl-w-ended: "Fin";
+      --pl-w-error: "Error";
+    }
+
+    :scope:lang(ro) {
+      --pl-w-ready: "Pregătit";
+      --pl-w-playing: "Rulează";
+      --pl-w-paused: "Pauză";
+      --pl-w-loading: "Se încarcă";
+      --pl-w-ended: "Gata";
+      --pl-w-error: "Eroare";
+    }
+
+    :scope:lang(ru) {
+      --pl-w-ready: "Готов";
+      --pl-w-playing: "Идёт";
+      --pl-w-paused: "Пауза";
+      --pl-w-loading: "Загрузка";
+      --pl-w-ended: "Конец";
+      --pl-w-error: "Ошибка";
+    }
+
+    :scope:lang(ar) {
+      --pl-w-ready: "جاهز";
+      --pl-w-playing: "يعمل";
+      --pl-w-paused: "متوقف";
+      --pl-w-loading: "تحميل";
+      --pl-w-ended: "انتهى";
+      --pl-w-error: "خطأ";
+    }
+
+    :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::after {
+      content: var(--pl-w-playing);
+    }
+
+    :scope:has(.pl-btn-play[data-started][data-paused]) .pl-status-word::after {
+      content: var(--pl-w-paused);
+    }
+
+    :scope:has(.pl-stage .pl-buffering[data-visible]) .pl-status-word::after {
+      content: var(--pl-w-loading);
+    }
+
+    :scope:has(.pl-btn-play[data-started][data-ended]) .pl-status-word::after {
+      content: var(--pl-w-ended);
+    }
+
+    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word::after {
+      content: var(--pl-w-error);
+    }
+
+    /* ------------------------------------------------------------------ Body: stage and index */
+
+    .pl-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pl-gap);
+      min-width: 0;
+    }
+
+    @container pl (width >= 760px) {
+      .pl-body {
+        grid-template-columns: minmax(0, 1fr) var(--pl-index-w);
+        gap: 0;
+      }
+
+      .pl-body:has(.pl-chapters[hidden]) {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* The stage: the picture plus registration marks in its margin, like a drawing ready for print. */
+    .pl-stage {
+      position: relative;
+      min-width: 0;
+      padding: var(--pl-bezel);
+      isolation: isolate;
+    }
+
+    .pl-stage::before {
+      content: "";
+      display: block;
+      aspect-ratio: 16 / 9;
+      border-radius: var(--media-video-border-radius);
+      background: #000;
+    }
+
+    /* The media element (first child) fills the picture area. Custom media such as <mux-video> render with
+       display: contents, so give them a box here. */
+    .pl-stage > :first-child:not(.pl-poster) {
+      position: absolute !important;
+      inset: var(--pl-bezel);
+      z-index: 0;
+      display: block !important;
+      width: auto !important;
+      height: auto !important;
+      overflow: hidden;
+      border-radius: var(--media-video-border-radius);
+    }
+
+    .pl-poster {
+      position: absolute;
+      inset: var(--pl-bezel);
+      z-index: 1;
+      overflow: hidden;
+      border-radius: var(--media-video-border-radius);
+      background: #000;
+    }
+
+    .pl-poster:not([data-visible]) {
+      display: none;
+    }
+
+    .pl-poster > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: var(--media-object-fit, contain);
+    }
+
+    .pl-mark {
+      position: absolute;
+      z-index: 2;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      border-color: var(--pl-line-strong);
+      border-style: solid;
+      border-width: 0;
+    }
+
+    .pl-mark-tl {
+      top: 2px;
+      left: 2px;
+      border-top-width: 1px;
+      border-left-width: 1px;
+    }
+
+    .pl-mark-tr {
+      top: 2px;
+      right: 2px;
+      border-top-width: 1px;
+      border-right-width: 1px;
+    }
+
+    .pl-mark-bl {
+      bottom: 2px;
+      left: 2px;
+      border-bottom-width: 1px;
+      border-left-width: 1px;
+    }
+
+    .pl-mark-br {
+      right: 2px;
+      bottom: 2px;
+      border-right-width: 1px;
+      border-bottom-width: 1px;
+    }
+
+    /* Centre ticks on each edge, the other half of a registration mark. */
+    .pl-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 50% 0 / 1px 8px no-repeat,
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 50% 100% / 1px 8px no-repeat,
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 0 50% / 8px 1px no-repeat,
+        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 100% 50% / 8px 1px no-repeat;
+    }
+
+    /* Buffering: a teal arc, nothing over the picture otherwise. */
+    .pl-buffering {
+      position: absolute;
+      inset: var(--pl-bezel);
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      border-radius: var(--media-video-border-radius);
+      background: rgb(4 8 11 / 0.4);
+    }
+
+    .pl-buffering:not([data-visible]) {
+      display: none;
+    }
+
+    .pl-spinner {
+      width: clamp(32px, 6cqi, 48px);
+      aspect-ratio: 1;
+      border: 1.5px solid var(--pl-line-strong);
+      border-top-color: var(--pl-teal);
+      border-radius: 50%;
+      animation: pl-spin 0.9s linear infinite;
+    }
+
+    @keyframes pl-spin {
+      to {
+        rotate: 1turn;
+      }
+    }
+
+    .pl-indicators {
+      position: absolute;
+      inset: var(--pl-bezel);
+      z-index: 4;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      padding: 12px;
+      pointer-events: none;
+    }
+
+    .pl-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: 99px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--pl-paper);
+      background: rgb(12 16 19 / 0.92);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pl-volume-indicator,
+    .pl-status-indicator {
+      grid-row: 1;
+      grid-column: 2;
+      align-self: start;
+    }
+
+    .pl-volume-indicator-fill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pl-indicator-label {
+      color: var(--pl-faint);
+    }
+
+    .pl-seek-indicator {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .pl-seek-indicator[data-direction="backward"] {
+      grid-column: 1;
+    }
+
+    .pl-seek-indicator[data-direction="forward"] {
+      grid-column: 3;
+    }
+
+    /* The index: chapters as numbered entries, the current one in teal. */
+    .pl-index {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      min-width: 0;
+      padding-top: var(--pl-gap);
+      border-top: 1px solid var(--pl-line);
+    }
+
+    .pl-index:has(.pl-chapters[hidden]) {
+      display: none;
+    }
+
+    @container pl (width >= 760px) {
+      .pl-index {
+        padding: var(--pl-bezel) 0 var(--pl-bezel) var(--pl-gap);
+        border-top: 0;
+        border-inline-start: 1px solid var(--pl-line);
+        margin-inline-start: var(--pl-gap);
+      }
+    }
+
+    .pl-chapters {
+      display: block;
+      min-width: 0;
+    }
+
+    .pl-chapter-list {
+      display: grid;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    @container pl (width < 760px) {
+      /* Narrow: a horizontal strip of entries, scrolled sideways. */
+      .pl-chapter-list {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+      }
+
+      .pl-chapter-list > li {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+      }
+    }
+
+    .pl-chapter {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: baseline;
+      gap: 12px;
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 10px 8px 16px;
+      border: 0;
+      border-radius: var(--pl-radius-sm);
+      font: inherit;
+      text-align: start;
+      color: var(--pl-mute);
+      background: transparent;
+      cursor: pointer;
+      transition:
+        color var(--media-duration-fast) ease-out,
+        background-color var(--media-duration-fast) ease-out;
+    }
+
+    .pl-chapter::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 4px;
+      top: 50%;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: transparent;
+      translate: 0 -50%;
+      transition: background-color var(--media-duration-fast) ease-out;
+    }
+
+    .pl-chapter-num {
+      font-family: var(--pl-mono);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--pl-faint);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pl-chapter-title {
+      overflow: hidden;
+      font-family: var(--pl-serif);
+      font-weight: 300;
+      font-size: clamp(17px, 2.1cqi, 22px);
+      line-height: 1.2;
+      letter-spacing: -0.005em;
+      text-overflow: ellipsis;
+    }
+
+    @container pl (width < 760px) {
+      .pl-chapter {
+        width: auto;
+        padding: 8px 14px 8px 18px;
+        border: 1px solid var(--pl-line);
+      }
+
+      .pl-chapter-title {
+        font-size: 16px;
+        white-space: nowrap;
+      }
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .pl-chapter:hover {
+        color: var(--pl-paper);
+        background: var(--pl-line-soft);
+      }
+    }
+
+    .pl-chapter:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 2px;
+    }
+
+    .pl-chapter[data-active] {
+      color: var(--pl-teal);
+    }
+
+    .pl-chapter[data-active] .pl-chapter-num {
+      color: var(--pl-teal);
+    }
+
+    .pl-chapter[data-active]::before {
+      background: var(--pl-teal);
+      box-shadow: 0 0 8px rgb(43 212 189 / 0.7);
+    }
+
+    @container pl (width < 760px) {
+      .pl-chapter[data-active] {
+        border-color: rgb(43 212 189 / 0.45);
+        background: rgb(43 212 189 / 0.08);
+      }
+    }
+
+    /* ------------------------------------------------------------------ The ruler (seek) */
+
+    .pl-ruler {
+      min-width: 0;
+      padding-top: 18px;
+      direction: ltr;
+    }
+
+    .pl-time-slider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 40px;
+      min-width: 0;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    /* Minor ticks every 7px and a taller one every 10%, like a printed rule. */
+    .pl-time-slider::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: 6px;
+      height: 12px;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(90deg, var(--pl-line-strong) 0 1px, transparent 1px 10%) 0 0 / calc(100% + 1px) 12px no-repeat,
+        repeating-linear-gradient(90deg, var(--pl-line) 0 1px, transparent 1px 7px) 0 5px / 100% 7px no-repeat;
+    }
+
+    .pl-time-slider[data-disabled] {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    .pl-ruler-marks {
+      position: absolute;
+      inset-inline: 0;
+      top: -18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    .pl-ruler-mark {
+      position: absolute;
+      left: var(--pl-at);
+      top: 0;
+      font-size: 11px;
+      line-height: 14px;
+      letter-spacing: 0.04em;
+      color: var(--pl-faint);
+      translate: -50% 0;
+      font-variant-numeric: tabular-nums;
+      transition: color var(--media-duration-fast) ease-out;
+    }
+
+    .pl-ruler-mark:first-child {
+      translate: 0 0;
+    }
+
+    /* The chapter tick that runs from the number down through the rule. */
+    .pl-ruler-mark::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      width: 1px;
+      height: 22px;
+      background: var(--pl-line-strong);
+    }
+
+    .pl-ruler-mark:first-child::after {
+      left: 0;
+    }
+
+    .pl-ruler-mark[data-active] {
+      color: var(--pl-teal);
+    }
+
+    .pl-ruler-mark[data-active]::after {
+      background: rgb(43 212 189 / 0.6);
+    }
+
+    .pl-time-slider-chapters {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      translate: 0 8px;
+    }
+
+    .pl-time-slider-chapter {
+      --pl-chapter-gap: 2px;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      clip-path: inset(0 calc(100% - var(--media-slider-chapter-end, 100%)) 0 var(--media-slider-chapter-start, 0%));
+    }
+
+    .pl-time-slider-track {
+      position: absolute;
+      inset-inline: 0;
+      height: 3px;
+      isolation: isolate;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--pl-line);
+      transition: height var(--media-duration-fast) var(--pl-ease);
+    }
+
+    .pl-time-slider:is([data-pointing], [data-dragging]) .pl-time-slider-track {
+      height: 5px;
+    }
+
+    .pl-time-slider-buffer,
+    .pl-time-slider-fill {
+      position: absolute;
+      inset-block: 0;
+      left: calc(var(--media-slider-chapter-start, 0%) + var(--pl-chapter-gap));
+    }
+
+    .pl-time-slider-buffer {
+      right: max(
+        calc(100% - var(--media-slider-buffer, 0%)),
+        calc(100% - var(--media-slider-chapter-end, 100%) + var(--pl-chapter-gap))
+      );
+      background: var(--pl-line-strong);
+    }
+
+    .pl-time-slider-fill {
+      right: max(
+        calc(100% - var(--media-slider-fill, 0%)),
+        calc(100% - var(--media-slider-chapter-end, 100%) + var(--pl-chapter-gap))
+      );
+      background: var(--pl-hot);
+    }
+
+    .pl-time-slider[data-dragging] .pl-time-slider-fill {
+      right: max(
+        calc(100% - var(--media-slider-pointer, 0%)),
+        calc(100% - var(--media-slider-chapter-end, 100%) + var(--pl-chapter-gap))
+      );
+    }
+
+    /* The playhead: a hot vertical line through the rule, with a dot on the track. */
+    .pl-time-slider-thumb {
+      position: absolute;
+      top: calc(50% - 4px);
+      left: var(--media-slider-fill, 0%);
+      width: 14px;
+      height: 40px;
+      transform: translate(-50%, -50%);
+      outline: none;
+      border-radius: 4px;
+    }
+
+    .pl-time-slider-thumb::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 6px;
+      width: 2px;
+      background: var(--pl-hot);
+      translate: -50% 0;
+    }
+
+    .pl-time-slider-thumb::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--pl-hot);
+      box-shadow: 0 0 0 3px var(--pl-surface), 0 0 12px rgb(255 95 69 / 0.55);
+      translate: -50% 0;
+      transition: scale var(--media-duration-fast) var(--pl-ease);
+    }
+
+    .pl-time-slider[data-dragging] .pl-time-slider-thumb {
+      left: var(--media-slider-pointer);
+    }
+
+    .pl-time-slider[data-dragging] .pl-time-slider-thumb::after {
+      scale: 1.25;
+    }
+
+    .pl-time-slider-thumb:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 2px;
+    }
+
+    .pl-time-slider-preview {
+      bottom: calc(100% + 18px);
+      z-index: 30;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      gap: 6px;
+      width: min-content;
+      min-width: 120px;
+      max-width: min(200px, 50cqi);
+      padding: 6px;
+      overflow: hidden;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: var(--pl-radius-sm);
+      background: var(--pl-raised);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--media-duration-fast) ease-out;
+    }
+
+    .pl-time-slider[data-pointing] .pl-time-slider-preview,
+    .pl-time-slider[data-dragging] .pl-time-slider-preview {
+      opacity: 1;
+    }
+
+    .pl-time-slider[data-disabled] .pl-time-slider-preview {
+      display: none;
+    }
+
+    @media (pointer: coarse) {
+      .pl-time-slider[data-pointing]:not([data-dragging]) .pl-time-slider-preview {
+        opacity: 0;
+      }
+    }
+
+    .pl-slider-thumbnail {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+
+    .pl-slider-thumbnail-image {
+      display: block;
+    }
+
+    .pl-time-slider-preview-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      width: 100%;
+      min-width: 0;
+      padding: 0 4px 2px;
+      text-align: center;
+    }
+
+    .pl-time-slider-value {
+      font-size: 12px;
+      color: var(--pl-paper);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pl-time-slider-chapter-title {
+      display: -webkit-box;
+      max-width: 100%;
+      overflow: hidden;
+      font-family: var(--pl-serif);
+      font-style: italic;
+      font-size: 14px;
+      line-height: 1.2;
+      color: var(--pl-mute);
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+
+    .pl-time-slider-chapter-title:empty {
+      display: none;
+    }
+
+    /* ------------------------------------------------------------------ Foot: timecode and a caption line of controls */
+
+    .pl-foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 20px;
+      min-width: 0;
+    }
+
+    @container pl (width >= 640px) {
+      .pl-foot {
+        flex-wrap: nowrap;
+      }
+
+      .pl-time {
+        flex: none;
+      }
+
+      .pl-controls {
+        flex: 1 1 auto;
+      }
+    }
+
+    .pl-time {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25em;
+      font-family: var(--pl-serif);
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(28px, 4.4cqi, 48px);
+      line-height: 1;
+      letter-spacing: -0.01em;
+      direction: ltr;
+      unicode-bidi: isolate;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .pl-time-current {
+      margin: -4px -6px;
+      padding: 4px 6px;
+      color: var(--pl-paper);
+      cursor: pointer;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .pl-time-current:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 2px;
+    }
+
+    .pl-time-current:is([data-disabled], [data-unavailable]) {
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    .pl-time-sep,
+    .pl-time-duration {
+      color: var(--pl-faint);
+    }
+
+    .pl-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px 4px;
+      min-width: 0;
+    }
+
+    .pl-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 6px 8px;
+      border-radius: var(--pl-radius-sm);
+      font-family: var(--pl-mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--pl-mute);
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+      transition:
+        color var(--media-duration-fast) ease-out,
+        background-color var(--media-duration-fast) ease-out;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .pl-btn:hover {
+        color: var(--pl-paper);
+        background: var(--pl-line-soft);
+      }
+    }
+
+    .pl-btn:active {
+      color: var(--pl-paper);
+      background: var(--pl-line);
+    }
+
+    .pl-btn:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 2px;
+    }
+
+    .pl-btn-text {
+      display: grid;
+    }
+
+    .pl-btn-text > * {
+      grid-area: 1 / 1;
+    }
+
+    /* The play key is the one solid shape on the plate. */
+    .pl-btn-play {
+      padding-inline: 14px 16px;
+      color: var(--pl-on-teal);
+      background: var(--pl-teal);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .pl-btn-play:hover {
+        color: var(--pl-on-teal);
+        background: #5fe6d3;
+      }
+    }
+
+    .pl-btn-play:active {
+      color: var(--pl-on-teal);
+      background: #24bba7;
+    }
+
+    .pl-btn-glyph {
+      display: grid;
+      width: 14px;
+      height: 14px;
+    }
+
+    .pl-icon {
+      grid-area: 1 / 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .pl-btn-play .pl-play-pause,
+    .pl-btn-play .pl-play-restart,
+    .pl-btn-play:not([data-paused]) .pl-play-play,
+    .pl-btn-play[data-ended] .pl-play-play {
+      visibility: hidden;
+    }
+
+    .pl-btn-play:not([data-paused]):not([data-ended]) .pl-play-pause,
+    .pl-btn-play[data-ended] .pl-play-restart {
+      visibility: visible;
+    }
+
+    .pl-btn-mute .pl-mute-off,
+    .pl-btn-mute[data-muted] .pl-mute-on {
+      visibility: hidden;
+    }
+
+    .pl-btn-mute[data-muted] .pl-mute-off {
+      visibility: visible;
+    }
+
+    .pl-btn-mute[data-muted] {
+      color: var(--pl-hot);
+    }
+
+    .pl-btn-seek {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pl-sep {
+      width: 1px;
+      height: 18px;
+      margin-inline: 4px;
+      background: var(--pl-line-strong);
+    }
+
+    /* Rate after the word, from the button's own state. */
+    .pl-btn-speed::after {
+      content: "\00D7" attr(data-rate);
+      color: var(--pl-faint);
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+
+    .pl-btn-cc[data-active] {
+      color: var(--pl-teal);
+    }
+
+    .pl-btn-cc[data-active]::after {
+      content: "";
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      width: 14px;
+      height: 1.5px;
+      background: var(--pl-teal);
+      translate: -50% 0;
+    }
+
+    /* Volume: the mute word plus a hairline slider. */
+    .pl-volume {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .pl-volume-slider {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: clamp(48px, 7cqi, 80px);
+      height: 44px;
+      margin-inline-end: 6px;
+      cursor: pointer;
+      touch-action: none;
+      direction: ltr;
+    }
+
+    .pl-volume-track {
+      position: absolute;
+      inset-inline: 0;
+      height: 2px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: var(--pl-line-strong);
+    }
+
+    .pl-volume-fill {
+      position: absolute;
+      inset-block: 0;
+      left: 0;
+      width: var(--media-slider-fill, 0%);
+      background: var(--pl-paper);
+    }
+
+    .pl-volume-thumb {
+      position: absolute;
+      left: var(--media-slider-fill, 0%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--pl-paper);
+      box-shadow: 0 0 0 3px var(--pl-surface);
+      transform: translateX(-50%);
+      outline: none;
+    }
+
+    .pl-volume-thumb:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 3px;
+    }
+
+    @container pl (width < 520px) {
+      .pl-foot {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pl-controls {
+        justify-content: space-between;
+      }
+
+      .pl-volume-slider,
+      .pl-sep {
+        display: none;
+      }
+
+      .pl-btn {
+        padding-inline: 8px;
+        letter-spacing: 0.08em;
+      }
+    }
+
+    /* ------------------------------------------------------------------ Error dialog */
+
+    .pl-dialog-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      border-radius: var(--pl-radius);
+      background: rgb(4 8 11 / 0.8);
+    }
+
+    .pl-dialog-backdrop:not([data-open]) {
+      display: none;
+    }
+
+    .pl-dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 50;
+      display: grid;
+      gap: 10px;
+      width: min(380px, calc(100% - 32px));
+      max-height: calc(100% - 32px);
+      overflow: auto;
+      padding: 20px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: var(--pl-radius);
+      background: var(--pl-raised);
+      color: var(--pl-paper);
+      transform: translate(-50%, -50%);
+      outline: none;
+    }
+
+    .pl-dialog:not([data-open]) {
+      display: none;
+    }
+
+    .pl-dialog:focus-visible {
+      outline: 2px solid var(--pl-teal);
+      outline-offset: 3px;
+    }
+
+    .pl-dialog-code {
+      color: var(--pl-hot);
+    }
+
+    .pl-dialog-title {
+      font-family: var(--pl-serif);
+      font-weight: 400;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .pl-dialog-description {
+      font-family: var(--pl-serif);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--pl-mute);
+    }
+
+    .pl-dialog-close {
+      justify-self: end;
+      border: 1px solid var(--pl-line-strong);
+    }
+
+    /* ------------------------------------------------------------------ Fullscreen */
+
+    :scope:is(:fullscreen, [data-fullscreen]) {
+      width: 100%;
+      height: 100%;
+      grid-template-rows: minmax(0, 1fr);
+      align-content: stretch;
+      background: var(--pl-ink);
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      height: 100%;
+      border-radius: 0;
+      border: 0;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
+      min-height: 0;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before {
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 120px;
+    }
+
+    @container pl (width >= 760px) {
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-index {
+        overflow-y: auto;
+      }
+    }
+
+    /* ------------------------------------------------------------------ Misc */
+
+    .pl-status-announcer {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    /* ------------------------------------------------------------------ Preferences */
+
+    @media (prefers-reduced-motion: reduce) {
+      .pl-spinner {
+        animation: none;
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .pl-plate::after {
+        display: none;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .pl-plate,
+      .pl-btn,
+      .pl-chapter,
+      .pl-dialog {
+        border: 1px solid CanvasText;
+      }
+
+      .pl-plate::after {
+        display: none;
+      }
+
+      .pl-btn:focus-visible,
+      .pl-chapter:focus-visible,
+      .pl-time-slider-thumb:focus-visible,
+      .pl-volume-thumb:focus-visible,
+      .pl-time-current:focus-visible {
+        outline: 3px solid Highlight;
+      }
+
+      .pl-chapter[data-active] {
+        forced-color-adjust: none;
+        color: Highlight;
+      }
+
+      .pl-time-slider-fill,
+      .pl-volume-fill,
+      .pl-time-slider-thumb::before,
+      .pl-time-slider-thumb::after {
+        forced-color-adjust: none;
+        background: Highlight;
+      }
+    }
+  }
+}

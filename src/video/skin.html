@@ -1,0 +1,186 @@
+<media-container class="media-skin media-container media-video pl" data-theme="scaffold" data-preset="video">
+<div class="pl-plate">
+<div class="pl-head" aria-hidden="true">
+<span class="pl-tag"><media-text token="pl.plate">Plate</media-text> 01 <span class="pl-dot">&middot;</span> <media-title class="pl-media-title"></media-title></span>
+<span class="pl-status"><media-text token="pl.status">Status</media-text> <span class="pl-status-word"></span></span>
+</div>
+<div class="pl-body">
+<div class="pl-stage">
+<!-- Add a compatible media component here. -->
+<media-poster class="media-poster pl-poster">
+<img alt="" decoding="async" class="media-poster-image">
+</media-poster>
+<span class="pl-mark pl-mark-tl" aria-hidden="true"></span>
+<span class="pl-mark pl-mark-tr" aria-hidden="true"></span>
+<span class="pl-mark pl-mark-bl" aria-hidden="true"></span>
+<span class="pl-mark pl-mark-br" aria-hidden="true"></span>
+<media-buffering-indicator class="pl-buffering">
+<span class="pl-spinner" aria-hidden="true"></span>
+</media-buffering-indicator>
+<div aria-hidden="true" class="pl-indicators">
+<media-volume-indicator class="pl-indicator pl-volume-indicator">
+<media-volume-indicator-fill class="pl-volume-indicator-fill">
+<span class="pl-indicator-label">Vol</span>
+<media-volume-indicator-value class="pl-indicator-value">
+</media-volume-indicator-value>
+</media-volume-indicator-fill>
+</media-volume-indicator>
+<media-seek-indicator class="pl-indicator pl-seek-indicator">
+<media-seek-indicator-value class="pl-indicator-value">
+</media-seek-indicator-value>
+</media-seek-indicator>
+<media-status-indicator actions="toggleSubtitles,toggleFullscreen,togglePictureInPicture" class="pl-indicator pl-status-indicator">
+<media-status-indicator-value class="pl-indicator-value">
+</media-status-indicator-value>
+</media-status-indicator>
+</div>
+</div>
+<div class="pl-index">
+<media-text class="pl-label pl-index-label" token="pl.index" aria-hidden="true">Index</media-text>
+<pl-chapters class="pl-chapters"></pl-chapters>
+</div>
+</div>
+<div class="pl-ruler">
+<media-time-slider class="pl-time-slider" thumb-alignment="edge">
+<pl-ruler-marks class="pl-ruler-marks" aria-hidden="true"></pl-ruler-marks>
+<media-time-slider-chapters class="pl-time-slider-chapters">
+<template>
+<div class="pl-time-slider-chapter">
+<media-slider-track class="pl-time-slider-track">
+<media-slider-buffer class="pl-time-slider-buffer">
+</media-slider-buffer>
+<media-slider-fill class="pl-time-slider-fill">
+</media-slider-fill>
+</media-slider-track>
+</div>
+</template>
+</media-time-slider-chapters>
+<media-slider-thumb class="pl-time-slider-thumb">
+</media-slider-thumb>
+<media-slider-preview class="pl-time-slider-preview">
+<media-slider-thumbnail class="pl-slider-thumbnail">
+<img alt="" aria-hidden="true" decoding="async" class="pl-slider-thumbnail-image">
+</media-slider-thumbnail>
+<div class="pl-time-slider-preview-label">
+<media-slider-value class="pl-time-slider-value" type="pointer">
+</media-slider-value>
+<media-time-slider-chapter-title class="pl-time-slider-chapter-title">
+</media-time-slider-chapter-title>
+</div>
+</media-slider-preview>
+</media-time-slider>
+</div>
+<div class="pl-foot">
+<div class="pl-time">
+<media-time class="pl-time-current" type="current" toggle>
+</media-time>
+<span class="pl-time-sep" aria-hidden="true">/</span>
+<media-time class="pl-time-duration" type="duration">
+</media-time>
+</div>
+<div class="pl-controls">
+<media-play-button class="pl-btn pl-btn-play">
+<span class="pl-btn-glyph" aria-hidden="true">
+<media-icon family="pl" name="play" class="pl-icon pl-play-play"></media-icon>
+<media-icon family="pl" name="pause" class="pl-icon pl-play-pause"></media-icon>
+<media-icon family="pl" name="restart" class="pl-icon pl-play-restart"></media-icon>
+</span>
+<span class="pl-btn-text" aria-hidden="true">
+<media-text class="pl-play-play" token="buttons.play">Play</media-text>
+<media-text class="pl-play-pause" token="buttons.pause">Pause</media-text>
+<media-text class="pl-play-restart" token="buttons.replay">Replay</media-text>
+</span>
+</media-play-button>
+<media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
+<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>
+</media-seek-button>
+<media-seek-button seconds="10" class="pl-btn pl-btn-seek">
+<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">+10</bdi></span>
+</media-seek-button>
+<span class="pl-sep" aria-hidden="true"></span>
+<div class="pl-volume">
+<media-mute-button class="pl-btn pl-btn-mute">
+<span class="pl-btn-text" aria-hidden="true">
+<media-text class="pl-mute-on" token="buttons.mute">Mute</media-text>
+<media-text class="pl-mute-off" token="buttons.unmute">Unmute</media-text>
+</span>
+</media-mute-button>
+<media-volume-slider class="pl-volume-slider">
+<media-slider-track class="pl-volume-track">
+<media-slider-fill class="pl-volume-fill">
+</media-slider-fill>
+</media-slider-track>
+<media-slider-thumb class="pl-volume-thumb">
+</media-slider-thumb>
+</media-volume-slider>
+</div>
+<media-playback-rate-button class="pl-btn pl-btn-speed">
+<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.speed">Speed</media-text></span>
+</media-playback-rate-button>
+<media-captions-button class="pl-btn pl-btn-cc">
+<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
+</media-captions-button>
+<media-fullscreen-button class="pl-btn pl-btn-full">
+<span class="pl-btn-text" aria-hidden="true"><media-text token="status.fullscreen">Fullscreen</media-text></span>
+</media-fullscreen-button>
+</div>
+</div>
+</div>
+<media-error-dialog>
+<media-dialog-backdrop class="pl-dialog-backdrop">
+</media-dialog-backdrop>
+<media-dialog-popup class="pl-dialog">
+<span class="pl-label pl-dialog-code" aria-hidden="true">Error</span>
+<media-dialog-title class="pl-dialog-title">
+</media-dialog-title>
+<media-dialog-description class="pl-dialog-description">
+</media-dialog-description>
+<media-dialog-close class="pl-btn pl-dialog-close" autofocus>
+</media-dialog-close>
+</media-dialog-popup>
+</media-error-dialog>
+<media-hotkey keys="Space" action="togglePaused">
+</media-hotkey>
+<media-hotkey keys="k" action="togglePaused">
+</media-hotkey>
+<media-hotkey keys="m" action="toggleMuted">
+</media-hotkey>
+<media-hotkey keys="ArrowRight" action="seekStep">
+</media-hotkey>
+<media-hotkey keys="ArrowLeft" action="seekStep">
+</media-hotkey>
+<media-hotkey keys="l" action="seekStep">
+</media-hotkey>
+<media-hotkey keys="j" action="seekStep">
+</media-hotkey>
+<media-hotkey keys="ArrowUp" action="volumeStep">
+</media-hotkey>
+<media-hotkey keys="ArrowDown" action="volumeStep">
+</media-hotkey>
+<media-hotkey keys="0-9" action="seekToPercent">
+</media-hotkey>
+<media-hotkey keys="Home" action="seekToPercent" value="0">
+</media-hotkey>
+<media-hotkey keys="End" action="seekToPercent" value="100">
+</media-hotkey>
+<media-hotkey keys=">" action="speedUp">
+</media-hotkey>
+<media-hotkey keys="<" action="speedDown">
+</media-hotkey>
+<media-hotkey keys="f" action="toggleFullscreen">
+</media-hotkey>
+<media-hotkey keys="c" action="toggleSubtitles">
+</media-hotkey>
+<media-gesture type="tap" action="togglePaused" pointer="mouse" region="center">
+</media-gesture>
+<media-gesture type="tap" action="togglePaused" pointer="touch" region="center">
+</media-gesture>
+<media-gesture type="doubletap" action="seekStep" region="left">
+</media-gesture>
+<media-gesture type="doubletap" action="toggleFullscreen" region="center">
+</media-gesture>
+<media-gesture type="doubletap" action="seekStep" region="right">
+</media-gesture>
+<media-status-announcer class="pl-status-announcer">
+</media-status-announcer>
+</media-container>
