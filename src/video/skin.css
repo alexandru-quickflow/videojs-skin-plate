@@ -152,7 +152,7 @@
       display: inline-flex;
       flex-shrink: 0;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
     }
 
     .pl-status-word {
@@ -1031,6 +1031,8 @@
 
     .pl-btn-text {
       display: grid;
+      /* Stacked words (Mute and Unmute) share the longest one's width; centre the shorter. */
+      justify-items: center;
     }
 
     .pl-btn-text > * {
@@ -1087,13 +1089,14 @@
       display: none;
     }
 
+    /* Fullscreen rearranges the plate anyway, so the key takes only the word it shows. */
     .pl-btn-full .pl-full-exit,
     .pl-btn-full[data-fullscreen] .pl-full-enter {
-      visibility: hidden;
+      display: none;
     }
 
     .pl-btn-full[data-fullscreen] .pl-full-exit {
-      visibility: visible;
+      display: block;
     }
 
     /* A control the media or the browser cannot use (no captions, no fullscreen on iOS) is left out. */
@@ -1168,7 +1171,8 @@
       align-items: center;
       width: clamp(48px, 7cqi, 80px);
       height: 44px;
-      margin-inline-end: 4px;
+      /* Room for the thumb, which centres on the track's end at zero volume. */
+      margin-inline: 10px 8px;
       cursor: pointer;
       touch-action: none;
       direction: ltr;
