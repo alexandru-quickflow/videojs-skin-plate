@@ -1251,15 +1251,18 @@
     /* Under 520px the timecode and four icon keys share one row: play, mute, fullscreen and
        More, which holds the seek, speed and captions keys. */
     @container pl (width < 520px) {
+      /* One row when it fits; on the narrowest players the keys drop under the timecode
+         as a whole, never one by one past the edge. */
       .pl-foot {
-        flex-wrap: nowrap;
-        gap: 12px;
+        flex-wrap: wrap;
+        gap: 8px 12px;
       }
 
       .pl-controls {
         flex: 0 0 auto;
         flex-wrap: nowrap;
         gap: 2px;
+        margin-inline-start: auto;
       }
 
       .pl-controls > :is(.pl-btn-seek, .pl-btn-speed, .pl-btn-cc, .pl-sep),
