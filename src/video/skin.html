@@ -161,27 +161,60 @@
 </span>
 <span class="pl-btn-text" aria-hidden="true"><media-text class="pl-full-enter" token="status.fullscreen">Fullscreen</media-text><media-text class="pl-full-exit" token="pl.exit">Exit</media-text></span>
 </media-fullscreen-button>
+<!-- More: a Video.js menu with a page per setting. pl-overflow links each item to its page
+     with ids of its own, so two players on a page never share them. -->
+<pl-overflow class="pl-overflow">
 <button type="button" class="pl-btn pl-btn-more pl-only-narrow">
 <span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="more" class="pl-icon"></media-icon></span>
 <media-text class="pl-visually-hidden pl-more-label" token="pl.more">More</media-text>
 </button>
-<!-- Video.js binds the popover to the key right before it and gives both ids. -->
-<media-popover side="top" align="end" class="pl-more">
-<pl-overflow class="pl-overflow">
-<media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
-<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>
-</media-seek-button>
-<media-seek-button seconds="10" class="pl-btn pl-btn-seek">
-<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">+10</bdi></span>
-</media-seek-button>
-<media-playback-rate-button class="pl-btn pl-btn-speed">
-<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.speed">Speed</media-text></span>
-</media-playback-rate-button>
-<media-captions-button class="pl-btn pl-btn-cc">
-<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
-</media-captions-button>
+<media-menu side="top" align="end" class="pl-menu pl-more">
+<media-menu-content class="pl-menu-content">
+<media-menu-item class="pl-menu-item pl-menu-page" data-page="speed">
+<media-text token="menu.speed">Speed</media-text>
+<span class="pl-menu-hint"><span class="pl-btn-value" data-part="value"></span><span class="pl-menu-chevron" aria-hidden="true">&rsaquo;</span></span>
+</media-menu-item>
+<media-menu-content class="pl-menu-content" data-page-for="speed">
+<media-menu-item class="pl-menu-item pl-menu-back"><span class="pl-menu-chevron" aria-hidden="true">&lsaquo;</span> <media-text token="menu.speed">Speed</media-text></media-menu-item>
+<media-playback-rate-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-playback-rate-radio-group>
+</media-menu-content>
+<media-menu-item class="pl-menu-item pl-menu-page" data-page="quality">
+<media-text token="menu.quality">Quality</media-text>
+<span class="pl-menu-hint"><span class="pl-btn-value" data-part="value"></span><span class="pl-menu-chevron" aria-hidden="true">&rsaquo;</span></span>
+</media-menu-item>
+<media-menu-content class="pl-menu-content" data-page-for="quality">
+<media-menu-item class="pl-menu-item pl-menu-back"><span class="pl-menu-chevron" aria-hidden="true">&lsaquo;</span> <media-text token="menu.quality">Quality</media-text></media-menu-item>
+<media-quality-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-quality-radio-group>
+</media-menu-content>
+<media-menu-item class="pl-menu-item pl-menu-page" data-page="captions">
+<media-text token="menu.captions">Captions</media-text>
+<span class="pl-menu-hint"><span class="pl-btn-value" data-part="value"></span><span class="pl-menu-chevron" aria-hidden="true">&rsaquo;</span></span>
+</media-menu-item>
+<media-menu-content class="pl-menu-content" data-page-for="captions">
+<media-menu-item class="pl-menu-item pl-menu-back"><span class="pl-menu-chevron" aria-hidden="true">&lsaquo;</span> <media-text token="menu.captions">Captions</media-text></media-menu-item>
+<media-captions-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-captions-radio-group>
+</media-menu-content>
+</media-menu-content>
+</media-menu>
 </pl-overflow>
-</media-popover>
 </div>
 </div>
 </div>

@@ -213,57 +213,37 @@ class RulerMarksElement extends UIElement {
 }
 
 /**
- * Lives inside the More popover. Names the panel after its key, moves focus to the first key
- * when it opens, and closes it when the player grows past the small layout, where the key that
- * opened it is hidden. Video.js already closes it when focus leaves.
+ * Wraps the More key and its Video.js menu. Gives each setting item and its page an id of their
+ * own (commandfor needs one, and two players on a page must not share it), and closes the menu
+ * when the player grows past the small layout, where the More key is hidden.
  */
 class OverflowElement extends HTMLElement {
-  #disconnect: AbortController | null = null;
   #resize: ResizeObserver | null = null;
 
   connectedCallback(): void {
-    const popover = this.closest('media-popover') as (HTMLElement & { close?: () => void; open?: boolean }) | null;
-    if (!popover) return;
-    this.#disconnect?.abort();
-    this.#disconnect = new AbortController();
-    const { signal } = this.#disconnect;
-
-    const label = popover.previousElementSibling?.querySelector('.pl-more-label');
-    if (label) {
-      label.id ||= `pl-more-label-${Math.random().toString(36).slice(2, 8)}`;
-      popover.setAttribute('aria-labelledby', label.id);
+    const uid = Math.random().toString(36).slice(2, 8);
+    for (const item of this.querySelectorAll<HTMLElement>('[data-page]')) {
+      const page = this.querySelector<HTMLElement>(`[data-page-for="${item.dataset.page}"]`);
+      if (!page) continue;
+      page.id ||= `pl-more-${item.dataset.page}-${uid}`;
+      item.setAttribute('commandfor', page.id);
     }
 
-    popover.addEventListener(
-      'open-change',
-      (event) => {
-        if ((event as CustomEvent<{ open: boolean }>).detail?.open) {
-          requestAnimationFrame(() => this.querySelector<HTMLElement>('.pl-btn:not([hidden])')?.focus());
-        } else if (this.contains(document.activeElement)) {
-          // Closing hides the focused key: hand focus back to the More key.
-          (popover.previousElementSibling as HTMLElement | null)?.focus();
-        }
-      },
-      { signal }
-    );
-
-    const player = popover.closest('.pl');
-    if (player) {
-      this.#resize = new ResizeObserver(([entry]) => {
-        if (!popover.open || (entry?.contentRect.width ?? 0) < SMALL_PLAYER) return;
-        // The More key hides at this width too, so focus goes to the play key.
-        if (this.contains(document.activeElement)) {
-          player.querySelector<HTMLElement>('.pl-controls > .pl-btn-play')?.focus();
-        }
-        popover.close?.();
-      });
-      this.#resize.observe(player);
-    }
+    const menu = this.querySelector('media-menu') as (HTMLElement & { open?: boolean }) | null;
+    const player = this.closest('.pl');
+    if (!menu || !player) return;
+    this.#resize = new ResizeObserver(([entry]) => {
+      if (!menu.open || (entry?.contentRect.width ?? 0) < SMALL_PLAYER) return;
+      // The More key hides at this width too, so focus goes to the play key.
+      if (this.contains(document.activeElement)) {
+        player.querySelector<HTMLElement>('.pl-controls > .pl-btn-play')?.focus();
+      }
+      menu.open = false;
+    });
+    this.#resize.observe(player);
   }
 
   disconnectedCallback(): void {
-    this.#disconnect?.abort();
-    this.#disconnect = null;
     this.#resize?.disconnect();
     this.#resize = null;
   }

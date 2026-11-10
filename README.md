@@ -7,14 +7,14 @@ A Video.js v10 skin drawn like a technical plate: a numbered head with a status 
 - **Chapter index.** One button per chapter cue, the playing one in the accent colour. Click one and the video jumps there. Video.js has no chapter navigation control yet, so the `pl-chapters` element reads the chapter cues from the player store. It shows only when the media has two or more chapters. Below a 760px wide player it becomes a strip that scrolls with the video.
 - **Ruler.** The time slider carries a numbered mark where each chapter starts (`pl-ruler-marks`) and a playhead.
 - **Controls under the picture**, never over it, so they read the same on any footage. Controls the media or browser can't use, such as captions without a track, are left out.
-- **Small players.** Under 600px the timecode shares a row with four icon keys: play, mute, fullscreen and More, a Video.js popover with the seek, speed and captions keys.
+- **Menus from Video.js.** Speed and Quality open Video.js menus of rates and renditions. Under 600px the timecode shares a row with four icon keys: play, mute, fullscreen and More, a Video.js menu with a page each for speed, quality and captions.
 - **Labels that match their names.** Visible words come from Video.js translations, and the word on a key is part of its accessible name; the speed key's name starts with it. The skin's own words are translated into German, French, Spanish, Romanian, Russian and Arabic; those six and English are the languages it supports.
 - **Keyboard.** Space and K play, M mutes, the arrows (and J, L) seek and set the volume, 0 to 9 jump to a tenth of the video, Home and End to the start and the end, < and > change the speed, F is fullscreen, C captions. Every control shows a focus ring.
 - **Preferences.** Reduced motion, higher contrast, reduced transparency and forced colors, and right-to-left layouts.
 
 ## Use it
 
-The skin is HTML, CSS and three small custom elements: two built on Video.js `UIElement` and `PlayerController`, and one that manages focus in the More popover. It isn't published to npm; copy the files in `src/video/` into your project:
+The skin is HTML, CSS and three small custom elements: two built on Video.js `UIElement` and `PlayerController`, and one that gives the More menu's pages their ids. It isn't published to npm; copy the files in `src/video/` into your project:
 
 - `skin.html`: the markup inside `<video-player>`
 - `skin.css`: the styles, scoped to `.media-skin.pl`

@@ -1319,16 +1319,6 @@
       margin-inline-end: 6px;
     }
 
-    /* Rate after the word, from the button's own state. */
-    .pl-btn-speed::after {
-      content: attr(data-rate) "\00D7";
-      color: var(--pl-faint);
-      letter-spacing: 0.04em;
-      font-variant-numeric: tabular-nums;
-      direction: ltr;
-      unicode-bidi: isolate;
-    }
-
     .pl-btn-cc[data-active] {
       color: var(--pl-teal);
     }
@@ -1414,7 +1404,7 @@
     }
 
     /* Under 600px the timecode and four icon keys share one row: play, mute, fullscreen and
-       More, which holds the seek, speed and captions keys. */
+       More, a menu with a page each for speed, quality and captions. */
     @container pl (width < 600px) {
       /* One row when it fits; on the narrowest players the keys drop under the timecode
          as a whole, never one by one past the edge. */
@@ -1431,7 +1421,7 @@
       }
 
       .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-cc, .pl-sep),
-      .pl-rate-menu,
+      .pl-rate-menu:not(.pl-rate-menu-more),
       .pl-volume-slider {
         display: none;
       }
@@ -1497,39 +1487,55 @@
       }
     }
 
-    /* The More panel: the keys that leave the row, as a small plate of their own. */
-    .pl-more {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 2px;
-      min-width: 160px;
-      padding: 6px;
-      border: 1px solid var(--pl-line-strong);
-      border-radius: var(--pl-radius-sm);
-      background: var(--pl-surface);
-      box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
-    }
-
-    .pl-more:is([data-open], :popover-open) {
-      display: flex;
-    }
-
+    /* The More menu: one page of settings, each opening its own page in the same plate. */
     .pl-overflow {
       display: contents;
     }
 
-    .pl-more .pl-btn {
-      justify-content: flex-start;
-      padding-inline: 12px;
+    .pl-more {
+      min-width: 240px;
     }
 
-    .pl-more .pl-btn-text {
-      justify-items: start;
+    /* A page shows alone: the open one, or the first page while none is. */
+    .pl-more .pl-menu-content[data-submenu]:not([data-open]),
+    .pl-more .pl-menu-content[data-child-open] > :not(.pl-menu-content[data-open]) {
+      display: none;
     }
 
-    /* ------------------------------------------------------------------ Quality menu */
+    .pl-menu-hint {
+      display: inline-flex;
+      white-space: nowrap;
+      align-items: center;
+      gap: 8px;
+      margin-inline-start: auto;
+    }
 
-    /* The key shows the word and the rendition playing, in the quieter grey. */
+    .pl-menu-chevron {
+      font-size: 14px;
+      line-height: 1;
+      color: var(--pl-faint);
+    }
+
+    .pl-menu-chevron:where(:dir(rtl)) {
+      scale: -1 1;
+    }
+
+    /* Setting items and the back item: no tick, which marks a choice. */
+    .pl-menu-page::before,
+    .pl-menu-back::before {
+      display: none;
+    }
+
+    .pl-menu-back {
+      gap: 8px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--pl-line);
+      border-radius: 0;
+      color: var(--pl-paper);
+    }
+
+    /* ------------------------------------------------------------------ Menus: Quality, Speed, More */
+
     /* The value a menu key carries (the rate, the rendition), in the quieter grey. */
     .pl-btn-value {
       color: var(--pl-faint);
