@@ -87,7 +87,7 @@ const player = mountPlate(document.querySelector('#reel'), {
 });
 ```
 
-The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` and `style: { '--plate-accent': '#ff6b00' }`.
+The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` (any status word, and `detail` for the ruler's preview) and `style: { '--plate-accent': '#ff6b00' }`.
 
 Values that aren't one of the listed options are ignored, with a warning in the console. To remove the player, empty the host with `host.replaceChildren()`.
 
@@ -100,7 +100,7 @@ npm install
 npm run dev
 ```
 
-The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction, theme and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar&theme=blueprint`. It's live at [staging.plate-skin.pages.dev](https://staging.plate-skin.pages.dev/), with test sources (and a field for your own video), Plate's properties and layout switches, a live accessibility readout (contrast and control names for the current settings), and a "Use it on your site" guide whose code loads the embed from `/embed/` there. `npm run build:site` builds the workbench with the embed beside it.
+The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction, theme and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar&theme=blueprint`. It's live at [staging.plate-skin.pages.dev](https://staging.plate-skin.pages.dev/), with test sources (and a field for your own video), every public property (colours, fonts, words) and the layout switches, a Download CSS button for your theme, a live accessibility readout (contrast and control names for the current settings), and a "Use it on your site" guide whose code loads the embed from `/embed/` there. `npm run build:site` builds the workbench with the embed beside it.
 
 `npm run typecheck` checks the types, and `npm run deploy` deploys the workbench to Vercel, Netlify or Cloudflare Pages.
 

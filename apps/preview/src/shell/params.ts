@@ -35,6 +35,25 @@ export const WIDTH_PRESETS = [
   { label: 'Wide', width: 1360 },
 ] as const;
 
+/** Plate's status words, plus the label on the ruler's preview. Empty keeps the skin's own, in every language. */
+export const WORD_KEYS = ['ready', 'playing', 'paused', 'loading', 'ended', 'error', 'detail'] as const;
+export type WordKey = (typeof WORD_KEYS)[number];
+
+/** Google Fonts that suit the plate, under the SIL Open Font License. The first is Plate's own. */
+export const SERIF_FONTS = ['Newsreader', 'Fraunces', 'Instrument Serif', 'Source Serif 4', 'Lora', 'Playfair Display'] as const;
+export const MONO_FONTS = ['JetBrains Mono', 'IBM Plex Mono', 'DM Mono', 'Space Mono', 'Fira Code', 'Roboto Mono'] as const;
+export type SerifFont = (typeof SERIF_FONTS)[number];
+export type MonoFont = (typeof MONO_FONTS)[number];
+
+/** The four colours of the plate itself, with Night's values for the colour wells. */
+export const PALETTE = [
+  { key: 'surface', label: 'Plate', property: '--plate-surface', night: '#0c1013' },
+  { key: 'print', label: 'Text and lines', property: '--plate-print', night: '#e9f2f0' },
+  { key: 'ink', label: 'Behind the plate', property: '--plate-ink', night: '#04080b' },
+  { key: 'raised', label: 'Menus and dialog', property: '--plate-raised', night: '#151a1c' },
+] as const;
+export type PaletteKey = (typeof PALETTE)[number]['key'];
+
 export const PRELOAD_VALUES = ['auto', 'metadata', 'none'] as const;
 export type PreloadValue = (typeof PRELOAD_VALUES)[number];
 
@@ -57,9 +76,12 @@ export interface WorkbenchParams {
   /** Plate's public properties; empty means the theme's own. */
   accent: string;
   playhead: string;
+  palette: Record<PaletteKey, string>;
+  serif: SerifFont;
+  mono: MonoFont;
   radius: string;
   number: string;
-  playingWord: string;
+  words: Record<WordKey, string>;
   index: IndexPlace;
   ruler: Ruler;
   head: boolean;
@@ -103,9 +125,14 @@ export function readParams(query: string): WorkbenchParams {
     customChapters: link(params.get('chapters')),
     accent: hex(params.get('accent')),
     playhead: hex(params.get('playhead')),
+    palette: Object.fromEntries(PALETTE.map(({ key }) => [key, hex(params.get(key))])) as Record<PaletteKey, string>,
+    serif: oneOf(SERIF_FONTS, params.get('serif'), 'Newsreader'),
+    mono: oneOf(MONO_FONTS, params.get('mono'), 'JetBrains Mono'),
     radius: /^\d{1,2}$/.test(params.get('radius') ?? '') ? params.get('radius')! : '',
     number: text(params.get('number'), 4),
-    playingWord: text(params.get('word'), 16),
+    words: Object.fromEntries(
+      WORD_KEYS.map((key) => [key, text(params.get(`w-${key}`) ?? (key === 'playing' ? params.get('word') : null), 16)])
+    ) as Record<WordKey, string>,
     index: oneOf(INDEX_PLACES, params.get('index'), 'end'),
     ruler: oneOf(RULERS, params.get('ruler'), 'dense'),
     head: params.get('head') !== '0',
@@ -131,9 +158,12 @@ export function writeParams(value: WorkbenchParams): string {
     chapters: value.customChapters,
     accent: value.accent,
     playhead: value.playhead,
+    ...Object.fromEntries(PALETTE.map(({ key }) => [key, value.palette[key]])),
+    serif: value.serif,
+    mono: value.mono,
     radius: value.radius,
     number: value.number,
-    word: value.playingWord,
+    ...Object.fromEntries(WORD_KEYS.map((key) => [`w-${key}`, value.words[key]])),
     index: value.index,
     ruler: value.ruler,
     head: flag(value.head),
@@ -189,13 +219,80 @@ export function applyDocumentParams(value: WorkbenchParams): void {
   else root.dataset.plateTheme = value.theme;
 
   // The public properties, on the page as a site would set them; the player inherits them.
-  const set = (name: string, v: string) => (v ? root.style.setProperty(name, v) : root.style.removeProperty(name));
-  set('--plate-accent', value.accent);
-  set('--plate-on-accent', value.accent ? onAccent(value.accent) : '');
-  set('--plate-playhead', value.playhead);
-  set('--plate-radius', value.radius ? `${value.radius}px` : '');
-  set('--plate-number', value.number ? cssString(value.number) : '');
-  set('--plate-word-playing', value.playingWord ? cssString(value.playingWord) : '');
+  for (const name of [...root.style]) if (name.startsWith('--plate-')) root.style.removeProperty(name);
+  for (const [name, v] of plateProperties(value)) root.style.setProperty(name, v);
+  loadFonts(value);
+}
+
+const FONT_CATEGORY = { serif: 'serif', mono: 'monospace' } as const;
+
+/** Every public property the current settings set, as a site would write them, colours and fonts first. */
+export function plateProperties(value: WorkbenchParams, { withWords = true } = {}): [string, string][] {
+  const out: [string, string][] = [];
+  if (value.accent) out.push(['--plate-accent', value.accent], ['--plate-on-accent', onAccent(value.accent)]);
+  if (value.playhead) out.push(['--plate-playhead', value.playhead]);
+  for (const { key, property } of PALETTE) if (value.palette[key]) out.push([property, value.palette[key]]);
+  if (value.serif !== 'Newsreader') out.push(['--plate-font-serif', `"${value.serif}", ${FONT_CATEGORY.serif}`]);
+  if (value.mono !== 'JetBrains Mono') out.push(['--plate-font-mono', `"${value.mono}", ${FONT_CATEGORY.mono}`]);
+  if (value.radius) out.push(['--plate-radius', `${value.radius}px`]);
+  if (value.number) out.push(['--plate-number', cssString(value.number)]);
+  if (withWords) for (const key of WORD_KEYS) if (value.words[key]) out.push([`--plate-word-${key}`, cssString(value.words[key])]);
+  return out;
+}
+
+/** The Google Fonts stylesheet for the chosen faces. */
+export function fontsUrl(value: WorkbenchParams): string {
+  const family = (name: string, axes: string) => `family=${name.replace(/ /g, '+')}${axes}`;
+  const serifAxes = value.serif === 'Instrument Serif' ? ':ital@0;1' : ':ital,wght@0,300;0,400;1,300;1,400';
+  return `https://fonts.googleapis.com/css2?${family(value.serif, serifAxes)}&${family(value.mono, ':wght@400;500')}&display=swap`;
+}
+
+/** In the preview: load the chosen faces once each, from Google Fonts. */
+function loadFonts(value: WorkbenchParams): void {
+  if (value.serif === 'Newsreader' && value.mono === 'JetBrains Mono') return;
+  const href = fontsUrl(value);
+  if (document.querySelector(`link[data-plate-fonts][href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  link.dataset.plateFonts = '';
+  document.head.append(link);
+}
+
+/** The words as a mountPlate option, or nothing. */
+function wordsOption(value: WorkbenchParams, indent: string): string[] {
+  const set = WORD_KEYS.filter((key) => value.words[key]);
+  if (!set.length) return [];
+  return [`${indent}words: { ${set.map((key) => `${key}: ${JSON.stringify(value.words[key])}`).join(', ')} },`];
+}
+
+/** The style option: every property but the number and the words, which have options of their own. */
+function styleOption(value: WorkbenchParams, indent: string): string[] {
+  const entries = plateProperties(value, { withWords: false }).filter(([name]) => name !== '--plate-number');
+  if (!entries.length) return [];
+  return [`${indent}style: {`, ...entries.map(([n, v]) => `${indent}  '${n}': ${JSON.stringify(v)},`), `${indent}},`];
+}
+
+/** Your theme as a stylesheet: the properties on the player, and the theme it starts from. */
+export function themeCss(value: WorkbenchParams): string {
+  const entries = plateProperties(value);
+  const lines = [
+    '/* A Plate theme from the workbench. */',
+    value.theme === 'night'
+      ? '/* Starts from Night, the default. */'
+      : `/* Starts from ${value.theme}: put data-plate-theme="${value.theme}" on the player or the page. */`,
+    'video-player {',
+    ...(entries.length ? entries.map(([n, v]) => `  ${n}: ${v};`) : ['  /* No changes yet: pick colours, fonts or words in Customise. */']),
+    '}',
+  ];
+  if (value.index !== 'end' || value.ruler !== 'dense' || !value.head) {
+    lines.push(
+      '',
+      '/* Layout switches go on the skin\'s container, <media-container class="media-skin pl">: */',
+      `/* ${[value.index !== 'end' && `data-index="${value.index}"`, value.ruler !== 'dense' && 'data-ruler="sparse"', !value.head && 'data-head="none"'].filter(Boolean).join(' ')} */`
+    );
+  }
+  return lines.join('\n') + '\n';
 }
 
 /** The skin's layout switches, on its container. */
@@ -236,12 +333,7 @@ export function codeSnippet(value: WorkbenchParams): string {
   if (value.ruler !== 'dense') lines.push(`  ruler: '${value.ruler}',`);
   if (!value.head) lines.push('  head: false,');
   if (value.number) lines.push(`  number: ${JSON.stringify(value.number)},`);
-  if (value.playingWord) lines.push(`  words: { playing: ${JSON.stringify(value.playingWord)} },`);
-  const style: string[] = [];
-  if (value.accent) style.push(`'--plate-accent': '${value.accent}'`, `'--plate-on-accent': '${onAccent(value.accent)}'`);
-  if (value.playhead) style.push(`'--plate-playhead': '${value.playhead}'`);
-  if (value.radius) style.push(`'--plate-radius': '${value.radius}px'`);
-  if (style.length) lines.push(`  style: { ${style.join(', ')} },`);
+  lines.push(...wordsOption(value, '  '), ...styleOption(value, '  '));
   return `const { mountPlate } = await import('/plate/plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
 }
 
@@ -261,16 +353,11 @@ export function embedSnippet(value: WorkbenchParams): string {
   if (value.ruler !== 'dense') options.push(`    ruler: '${value.ruler}',`);
   if (!value.head) options.push('    head: false,');
   if (value.number) options.push(`    number: ${JSON.stringify(value.number)},`);
-  if (value.playingWord) options.push(`    words: { playing: ${JSON.stringify(value.playingWord)} },`);
-  const style: string[] = [];
-  if (value.accent) style.push(`'--plate-accent': '${value.accent}'`, `'--plate-on-accent': '${onAccent(value.accent)}'`);
-  if (value.playhead) style.push(`'--plate-playhead': '${value.playhead}'`);
-  if (value.radius) style.push(`'--plate-radius': '${value.radius}px'`);
-  if (style.length) options.push(`    style: { ${style.join(', ')} },`);
+  options.push(...wordsOption(value, '    '), ...styleOption(value, '    '));
 
   return [
     '<div id="plate-player"></div>',
-    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&display=swap">',
+    `<link rel="stylesheet" href="${fontsUrl(value)}">`,
     `<link rel="stylesheet" href="${EMBED_BASE}plate-embed.css">`,
     '<script type="module">',
     `  import { mountPlate } from '${EMBED_BASE}plate-embed.js';`,

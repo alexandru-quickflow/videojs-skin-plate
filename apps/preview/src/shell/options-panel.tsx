@@ -21,6 +21,14 @@ import { locales } from './config';
 import {
   ASPECT_RATIOS,
   codeSnippet,
+  MONO_FONTS,
+  PALETTE,
+  SERIF_FONTS,
+  themeCss,
+  WORD_KEYS,
+  type MonoFont,
+  type SerifFont,
+  type WordKey,
   COLOR_SCHEMES,
   INDEX_PLACES,
   RULERS,
@@ -63,6 +71,16 @@ const SOURCE_LABELS: Record<Source, string> = {
 };
 const INDEX_LABELS: Record<IndexPlace, string> = { end: 'After the picture', start: 'Before the picture', none: 'Hidden' };
 const RULER_LABELS: Record<Ruler, string> = { dense: 'Every tick', sparse: 'Tall ticks only' };
+
+const WORD_LABELS: Record<WordKey, string> = {
+  ready: 'Ready',
+  playing: 'Playing',
+  paused: 'Paused',
+  loading: 'Loading',
+  ended: 'Ended',
+  error: 'Error',
+  detail: 'Detail (ruler)',
+};
 
 const PRELOAD_LABELS: Record<PreloadValue, string> = { auto: 'Auto', metadata: 'Metadata', none: 'None' };
 
@@ -191,6 +209,27 @@ export function OptionsPanel({ id, params, onParamsChange, preferences, report }
             fallback="#ff5f45"
             onChange={(playhead) => onParamsChange({ playhead })}
           />
+          {PALETTE.map(({ key, label, night }) => (
+            <ColorField
+              key={key}
+              label={label}
+              value={params.palette[key]}
+              fallback={night}
+              onChange={(color) => onParamsChange({ palette: { ...params.palette, [key]: color } })}
+            />
+          ))}
+          <SelectField
+            label="Serif"
+            value={params.serif}
+            onChange={(value) => onParamsChange({ serif: value as SerifFont })}
+            options={SERIF_FONTS.map((value) => ({ value, label: value }))}
+          />
+          <SelectField
+            label="Mono"
+            value={params.mono}
+            onChange={(value) => onParamsChange({ mono: value as MonoFont })}
+            options={MONO_FONTS.map((value) => ({ value, label: value }))}
+          />
           <TextField
             label="Corner radius"
             value={params.radius}
@@ -205,12 +244,18 @@ export function OptionsPanel({ id, params, onParamsChange, preferences, report }
             placeholder="01"
             onChange={(number) => onParamsChange({ number: number.slice(0, 4) })}
           />
-          <TextField
-            label="Word while playing"
-            value={params.playingWord}
-            placeholder="Playing"
-            onChange={(playingWord) => onParamsChange({ playingWord: playingWord.slice(0, 16) })}
-          />
+          <p className="text-muted-foreground col-span-2 pt-1 text-xs">
+            Status words. Empty keeps Plate's own, translated into every language.
+          </p>
+          {WORD_KEYS.map((key) => (
+            <TextField
+              key={key}
+              label={WORD_LABELS[key]}
+              value={params.words[key]}
+              placeholder={WORD_LABELS[key].replace(' (ruler)', '')}
+              onChange={(word) => onParamsChange({ words: { ...params.words, [key]: word.slice(0, 16) } })}
+            />
+          ))}
           <SelectField
             label="Index"
             value={params.index}
@@ -232,6 +277,7 @@ export function OptionsPanel({ id, params, onParamsChange, preferences, report }
 
         <Section title="Code">
           <CodeBlock code={codeSnippet(params)} />
+          <DownloadCss css={themeCss(params)} />
         </Section>
 
         <Section title="Playback">
@@ -521,6 +567,28 @@ function A11yReadout({ report }: { report: A11yReport | null }) {
           ))}
         </ul>
       </details>
+    </div>
+  );
+}
+
+/** Your theme as a small CSS file of Plate's properties, to keep or put on a site. */
+function DownloadCss({ css }: { css: string }) {
+  return (
+    <div className="col-span-2 flex items-center justify-between gap-2">
+      <span className="text-muted-foreground text-xs">Your colours, fonts and words as CSS</span>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => {
+          const url = URL.createObjectURL(new Blob([css], { type: 'text/css' }));
+          const link = Object.assign(document.createElement('a'), { href: url, download: 'plate-theme.css' });
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }}
+      >
+        Download CSS
+      </Button>
     </div>
   );
 }

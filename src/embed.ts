@@ -26,8 +26,8 @@ export interface PlateOptions {
   ruler?: 'dense' | 'sparse';
   /** `false` drops the head line. */
   head?: boolean;
-  /** Your own status words, such as { playing: 'On air' }. */
-  words?: Partial<Record<'ready' | 'playing' | 'paused' | 'loading' | 'ended' | 'error', string>>;
+  /** Your own status words, such as { playing: 'On air' }; `detail` labels the ruler's preview. */
+  words?: Partial<Record<'ready' | 'playing' | 'paused' | 'loading' | 'ended' | 'error' | 'detail', string>>;
   /** Any public property, such as { '--plate-accent': '#ff6b00' }. */
   style?: Record<`--plate-${string}`, string>;
 }
@@ -47,7 +47,7 @@ const cssString = (value: string): string =>
 
 const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 const INDEXES = ['end', 'start', 'none'] as const;
-const STATES = ['ready', 'playing', 'paused', 'loading', 'ended', 'error'] as const;
+const STATES = ['ready', 'playing', 'paused', 'loading', 'ended', 'error', 'detail'] as const;
 
 const oneOf = <T extends string>(list: readonly T[], value: unknown, name: string): T | undefined => {
   if (value === undefined) return undefined;
