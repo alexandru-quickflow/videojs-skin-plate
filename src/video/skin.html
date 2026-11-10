@@ -136,9 +136,21 @@
 </media-quality-radio-group>
 </media-menu-content>
 </media-menu>
-<media-playback-rate-button class="pl-btn pl-btn-speed">
-<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.speed">Speed</media-text></span>
-</media-playback-rate-button>
+<!-- Speed: a menu of rates from Video.js, bound to the key right before it. The key shows the rate. -->
+<button type="button" class="pl-btn pl-btn-rate">
+<span class="pl-btn-text"><span><media-text token="menu.speed">Speed</media-text> <span class="pl-btn-value" data-part="value"></span></span></span>
+</button>
+<media-menu side="top" align="end" class="pl-menu pl-rate-menu">
+<media-menu-content class="pl-menu-content">
+<media-playback-rate-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-playback-rate-radio-group>
+</media-menu-content>
+</media-menu>
 <media-captions-button class="pl-btn pl-btn-cc">
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
 </media-captions-button>

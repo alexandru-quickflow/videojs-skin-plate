@@ -37,6 +37,7 @@ import '@videojs/html/ui/menu';
 import '@videojs/html/ui/menu-content';
 import '@videojs/html/ui/menu-radio-item';
 import '@videojs/html/ui/quality-radio-group';
+import '@videojs/html/ui/playback-rate-radio-group';
 import '@videojs/html/ui/hotkey';
 import '@videojs/html/ui/gesture';
 import '@videojs/html/ui/status-announcer';

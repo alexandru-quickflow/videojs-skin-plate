@@ -1430,7 +1430,8 @@
         margin-inline-start: auto;
       }
 
-      .pl-controls > :is(.pl-btn-seek, .pl-btn-speed, .pl-btn-cc, .pl-sep),
+      .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-cc, .pl-sep),
+      .pl-rate-menu,
       .pl-volume-slider {
         display: none;
       }
@@ -1529,6 +1530,19 @@
     /* ------------------------------------------------------------------ Quality menu */
 
     /* The key shows the word and the rendition playing, in the quieter grey. */
+    /* The value a menu key carries (the rate, the rendition), in the quieter grey. */
+    .pl-btn-value {
+      color: var(--pl-faint);
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+      unicode-bidi: isolate;
+    }
+
+    .pl-btn-value:empty {
+      display: none;
+    }
+
     .pl-quality-value {
       color: var(--pl-faint);
       letter-spacing: 0.04em;
