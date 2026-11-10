@@ -17,25 +17,46 @@ const BROKEN_SRC = 'https://stream.mux.com/not-a-playback-id.m3u8';
 const CHAPTERS = '<track kind="chapters" label="English" srclang="en" src="./cosmic-dawn-chapters.vtt" default>';
 const ONE_CHAPTER = '<track kind="chapters" label="English" srclang="en" src="./one-chapter.vtt" default>';
 
-const TRACKS: Record<Source, string> = {
+const TRACKS: Record<Exclude<Source, 'custom'>, string> = {
   chapters: CHAPTERS,
   'one-chapter': ONE_CHAPTER,
   'no-chapters': '',
   error: CHAPTERS,
 };
 
+const attr = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
 const MEDIA_PLACEHOLDER = '<!-- Add a compatible media component here. -->';
 
-export function createPlayer(source: Source = 'chapters'): HTMLElement {
+/** Your own media, for the `custom` source. */
+export interface CustomMedia {
+  src: string;
+  chapters: string;
+}
+
+export function createPlayer(source: Source = 'chapters', custom?: CustomMedia): HTMLElement {
   const player = document.createElement('video-player');
   const plain = source === 'no-chapters';
   player.setAttribute('poster', plain ? PLAIN_POSTER : POSTER);
   player.setAttribute('content-title', plain ? 'Showreel' : 'Cosmic Dawn');
 
+  if (source === 'custom') {
+    player.removeAttribute('poster');
+    player.setAttribute('content-title', 'Your video');
+    const track = custom?.chapters
+      ? `<track kind="chapters" label="Chapters" srclang="en" src="${attr(custom.chapters)}" default>`
+      : '';
+    player.innerHTML = skinTemplate.replace(
+      MEDIA_PLACEHOLDER,
+      custom?.src ? `<mux-video src="${attr(custom.src)}" playsinline crossorigin>${track}</mux-video>` : '<mux-video playsinline crossorigin></mux-video>'
+    );
+    return player;
+  }
+
   const src = source === 'error' ? BROKEN_SRC : plain ? PLAIN_SRC : SRC;
   player.innerHTML = skinTemplate.replace(
     MEDIA_PLACEHOLDER,
-    `<mux-video src="${src}" playsinline crossorigin>${TRACKS[source]}</mux-video>`
+    `<mux-video src="${src}" playsinline crossorigin>${TRACKS[source as Exclude<Source, 'custom'>]}</mux-video>`
   );
 
   return player;

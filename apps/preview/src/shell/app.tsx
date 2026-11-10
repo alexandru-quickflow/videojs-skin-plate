@@ -2,7 +2,8 @@ import { SidebarProvider } from '@preview/shell/components/ui/sidebar';
 import { type CSSProperties, useEffect, useId, useRef, useState } from 'react';
 
 import { skin } from './config';
-import { PARAMS_MESSAGE } from './messages';
+import type { A11yReport } from '../frame/a11y';
+import { A11Y_MESSAGE, PARAMS_MESSAGE } from './messages';
 import { Navbar } from './navbar';
 import { OptionsPanel } from './options-panel';
 import { readParams, writeParams, type WorkbenchParams } from './params';
@@ -24,6 +25,16 @@ export function App() {
   // The frame loads once with the first settings; later changes are posted to it, so playback is never interrupted.
   const [frameUrl] = useState(() => `./preview.html#${writeParams(params)}`);
   const preferences = usePreferences();
+  const [report, setReport] = useState<A11yReport | null>(null);
+
+  // The frame measures the skin as it renders and posts what it found.
+  useEffect(() => {
+    const receive = (event: MessageEvent) => {
+      if (event.origin === location.origin && event.data?.type === A11Y_MESSAGE) setReport(event.data.report);
+    };
+    window.addEventListener('message', receive);
+    return () => window.removeEventListener('message', receive);
+  }, []);
   const query = writeParams(params);
 
   // Every setting lives in the URL, so a reload or a shared link reproduces the preview.
@@ -51,7 +62,7 @@ export function App() {
       className="bg-background text-foreground h-screen min-h-0 flex-col overflow-hidden"
       style={{ '--sidebar-width': '20rem' } as CSSProperties}
     >
-      <Navbar previewUrl={`./preview.html#${query}`} optionsId={optionsId} />
+      <Navbar previewUrl={`./preview.html#${query}`} optionsId={optionsId} params={params} />
       <div className="flex min-h-0 flex-1">
         <main className="flex min-h-0 min-w-0 flex-1 flex-col">
           <iframe
@@ -62,7 +73,7 @@ export function App() {
             title={`${skin.name} preview`}
           />
         </main>
-        <OptionsPanel id={optionsId} params={params} onParamsChange={update} preferences={preferences} />
+        <OptionsPanel id={optionsId} params={params} onParamsChange={update} preferences={preferences} report={report} />
       </div>
     </SidebarProvider>
   );

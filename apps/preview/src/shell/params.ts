@@ -18,7 +18,7 @@ export const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 export type Theme = (typeof THEMES)[number];
 
 /** What the preview plays: the trailer with chapters, the edge cases, and a stream that fails. */
-export const SOURCES = ['chapters', 'one-chapter', 'no-chapters', 'error'] as const;
+export const SOURCES = ['chapters', 'one-chapter', 'no-chapters', 'error', 'custom'] as const;
 export type Source = (typeof SOURCES)[number];
 
 export const INDEX_PLACES = ['end', 'start', 'none'] as const;
@@ -51,6 +51,9 @@ export interface WorkbenchParams {
   locale: Locale;
   theme: Theme;
   source: Source;
+  /** Your own media for the `custom` source: an HLS or MP4 URL, and a WebVTT chapters URL. */
+  customSrc: string;
+  customChapters: string;
   /** Plate's public properties; empty means the theme's own. */
   accent: string;
   playhead: string;
@@ -69,6 +72,15 @@ export interface WorkbenchParams {
 const HEX = /^#[0-9a-f]{6}$/i;
 const hex = (value: string | null) => (value && HEX.test(value) ? value.toLowerCase() : '');
 const text = (value: string | null, max: number) => (value ?? '').slice(0, max);
+/** Only https links, so a shared URL can't point the preview anywhere else. */
+const link = (value: string | null) => {
+  try {
+    const url = new URL(value ?? '');
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+};
 
 function oneOf<const Values extends readonly string[]>(values: Values, value: string | null, fallback: Values[number]) {
   return values.includes(value ?? '') ? (value as Values[number]) : fallback;
@@ -87,6 +99,8 @@ export function readParams(query: string): WorkbenchParams {
     locale: oneOf(locales, params.get('locale'), 'en'),
     theme: oneOf(THEMES, params.get('theme'), 'night'),
     source: oneOf(SOURCES, params.get('source'), 'chapters'),
+    customSrc: link(params.get('src')),
+    customChapters: link(params.get('chapters')),
     accent: hex(params.get('accent')),
     playhead: hex(params.get('playhead')),
     radius: /^\d{1,2}$/.test(params.get('radius') ?? '') ? params.get('radius')! : '',
@@ -113,6 +127,8 @@ export function writeParams(value: WorkbenchParams): string {
     locale: value.locale,
     theme: value.theme,
     source: value.source,
+    src: value.customSrc,
+    chapters: value.customChapters,
     accent: value.accent,
     playhead: value.playhead,
     radius: value.radius,
@@ -210,7 +226,11 @@ export function onAccent(hexColor: string): string {
 
 /** The `mountPlate` call for the current settings, the way a site would write it. */
 export function codeSnippet(value: WorkbenchParams): string {
-  const lines: string[] = [`  src: 'https://stream.mux.com/PLAYBACK_ID.m3u8',`, `  chapters: '/chapters.vtt',`];
+  const custom = value.source === 'custom';
+  const lines: string[] = [
+    `  src: '${(custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8'}',`,
+    `  chapters: '${(custom && value.customChapters) || '/chapters.vtt'}',`,
+  ];
   if (value.theme !== 'night') lines.push(`  theme: '${value.theme}',`);
   if (value.index !== 'end') lines.push(`  index: '${value.index}',`);
   if (value.ruler !== 'dense') lines.push(`  ruler: '${value.ruler}',`);
@@ -223,4 +243,40 @@ export function codeSnippet(value: WorkbenchParams): string {
   if (value.radius) style.push(`'--plate-radius': '${value.radius}px'`);
   if (style.length) lines.push(`  style: { ${style.join(', ')} },`);
   return `const { mountPlate } = await import('/plate/plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
+}
+
+/** Where the deployed workbench serves the embed build (see apps/preview/stage-embed.mjs). */
+export const EMBED_BASE = 'https://staging.plate-skin.pages.dev/embed/';
+
+/** The whole block a site builder's HTML or Embed element takes: fonts, styles and the player. */
+export function embedSnippet(value: WorkbenchParams): string {
+  const custom = value.source === 'custom';
+  const options = [
+    `    src: '${(custom && value.customSrc) || 'YOUR_VIDEO_LINK'}',`,
+    `    chapters: '${(custom && value.customChapters) || 'YOUR_CHAPTERS_LINK'}',`,
+    `    title: 'My video',`,
+  ];
+  if (value.theme !== 'night') options.push(`    theme: '${value.theme}',`);
+  if (value.index !== 'end') options.push(`    index: '${value.index}',`);
+  if (value.ruler !== 'dense') options.push(`    ruler: '${value.ruler}',`);
+  if (!value.head) options.push('    head: false,');
+  if (value.number) options.push(`    number: ${JSON.stringify(value.number)},`);
+  if (value.playingWord) options.push(`    words: { playing: ${JSON.stringify(value.playingWord)} },`);
+  const style: string[] = [];
+  if (value.accent) style.push(`'--plate-accent': '${value.accent}'`, `'--plate-on-accent': '${onAccent(value.accent)}'`);
+  if (value.playhead) style.push(`'--plate-playhead': '${value.playhead}'`);
+  if (value.radius) style.push(`'--plate-radius': '${value.radius}px'`);
+  if (style.length) options.push(`    style: { ${style.join(', ')} },`);
+
+  return [
+    '<div id="plate-player"></div>',
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&display=swap">',
+    `<link rel="stylesheet" href="${EMBED_BASE}plate-embed.css">`,
+    '<script type="module">',
+    `  import { mountPlate } from '${EMBED_BASE}plate-embed.js';`,
+    "  mountPlate(document.getElementById('plate-player'), {",
+    ...options,
+    '  });',
+    '</script>',
+  ].join('\n');
 }

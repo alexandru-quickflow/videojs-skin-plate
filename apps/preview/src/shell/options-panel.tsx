@@ -43,6 +43,7 @@ import {
   type TextDirection,
   type WorkbenchParams,
 } from './params';
+import type { A11yReport } from '../frame/a11y';
 import { PREFERENCE_QUERIES, type Preferences } from './preferences';
 import { SelectField } from './select';
 
@@ -58,6 +59,7 @@ const SOURCE_LABELS: Record<Source, string> = {
   'one-chapter': 'One chapter',
   'no-chapters': 'No chapters',
   error: 'Broken stream',
+  custom: 'Your video',
 };
 const INDEX_LABELS: Record<IndexPlace, string> = { end: 'After the picture', start: 'Before the picture', none: 'Hidden' };
 const RULER_LABELS: Record<Ruler, string> = { dense: 'Every tick', sparse: 'Tall ticks only' };
@@ -75,10 +77,12 @@ export type OptionsPanelProps = {
   params: WorkbenchParams;
   onParamsChange: (value: Partial<WorkbenchParams>) => void;
   preferences: Preferences;
+  /** What the preview measured: control names and contrast. */
+  report: A11yReport | null;
 };
 
 /** How the preview looks and plays. Sits beside the preview, so its controls never cover it. */
-export function OptionsPanel({ id, params, onParamsChange, preferences }: OptionsPanelProps) {
+export function OptionsPanel({ id, params, onParamsChange, preferences, report }: OptionsPanelProps) {
   const { isMobile, setOpen, setOpenMobile } = useSidebar();
   const close = () => {
     if (isMobile) setOpenMobile(false);
@@ -161,6 +165,22 @@ export function OptionsPanel({ id, params, onParamsChange, preferences }: Option
             onChange={(value) => onParamsChange({ source: value as Source })}
             options={SOURCES.map((value) => ({ value, label: SOURCE_LABELS[value] }))}
           />
+          {params.source === 'custom' && (
+            <>
+              <LinkField
+                label="Video link"
+                value={params.customSrc}
+                placeholder="https://stream.mux.com/….m3u8"
+                onChange={(customSrc) => onParamsChange({ customSrc })}
+              />
+              <LinkField
+                label="Chapters (VTT)"
+                value={params.customChapters}
+                placeholder="https://…/chapters.vtt"
+                onChange={(customChapters) => onParamsChange({ customChapters })}
+              />
+            </>
+          )}
         </Section>
 
         <Section title="Customise">
@@ -204,6 +224,10 @@ export function OptionsPanel({ id, params, onParamsChange, preferences }: Option
             options={RULERS.map((value) => ({ value, label: RULER_LABELS[value] }))}
           />
           <SwitchItem label="Head line" checked={params.head} onChange={(head) => onParamsChange({ head })} />
+        </Section>
+
+        <Section title="Accessibility">
+          <A11yReadout report={report} />
         </Section>
 
         <Section title="Code">
@@ -414,6 +438,90 @@ function TextField({
         {suffix && <span className="text-muted-foreground text-sm">{suffix}</span>}
       </div>
     </>
+  );
+}
+
+/** A link field that applies on Enter or when it loses focus, so the player isn't rebuilt on every key. */
+function LinkField({
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  const id = useId();
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = (next: string) => {
+    setDraft(null);
+    const trimmed = next.trim();
+    if (trimmed !== value) onChange(trimmed);
+  };
+
+  return (
+    <div className="col-span-2 grid gap-1.5">
+      <Label htmlFor={id} className="text-muted-foreground font-normal">
+        {label}
+      </Label>
+      <Input
+        id={id}
+        type="url"
+        inputMode="url"
+        value={draft ?? value}
+        placeholder={placeholder}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={(event) => commit(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            commit(event.currentTarget.value);
+          }
+        }}
+        className="h-8 text-sm"
+      />
+    </div>
+  );
+}
+
+/** Contrast for the current theme and properties, measured in the preview, and the name of every control on show. */
+function A11yReadout({ report }: { report: A11yReport | null }) {
+  if (!report) return <p className="text-muted-foreground col-span-2 text-xs">Measuring the player…</p>;
+
+  return (
+    <div className="col-span-2 grid gap-3 text-xs">
+      <table className="w-full border-collapse">
+        <caption className="text-muted-foreground pb-1 text-left">Contrast against the plate (WCAG AA)</caption>
+        <tbody>
+          {report.contrast.map((row) => {
+            const pass = row.ratio >= row.minimum;
+            return (
+              <tr key={row.name} className="border-b last:border-0">
+                <th scope="row" className="py-1 pr-2 text-left font-normal">
+                  {row.name}
+                </th>
+                <td className="py-1 text-right tabular-nums">{row.ratio.toFixed(2)}:1</td>
+                <td className={`py-1 pl-2 text-right font-medium ${pass ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {pass ? 'Pass' : `Below ${row.minimum}`}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <details>
+        <summary className="cursor-pointer">Names a screen reader hears ({report.controls.length})</summary>
+        <ul className="text-muted-foreground mt-2 grid gap-1">
+          {report.controls.map((control) => (
+            <li key={control.role + control.name}>
+              <span className="text-foreground">{control.name || '(no name)'}</span> · {control.role}
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
   );
 }
 

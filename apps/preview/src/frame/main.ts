@@ -1,8 +1,9 @@
 import '@videojs/html/i18n';
 import '@/skin.css';
 import './preview.css';
-import { applySkinParams, playerStyles, type Source, type WorkbenchParams } from '../shell/params';
+import { applySkinParams, playerStyles, type WorkbenchParams } from '../shell/params';
 import { applyMediaParams, initialParams, onParamsChange } from './frame';
+import { startReporting } from './a11y';
 import { createPlayer } from './player';
 
 // The i18n provider follows the page's `lang` and loads Video.js's built-in translations for it.
@@ -13,13 +14,14 @@ wrapper.className = 'preview-player';
 wrapper.append(i18n);
 document.getElementById('root')!.append(wrapper);
 
-let source: Source | null = null;
+let mounted = '';
 
 function render(params: WorkbenchParams): void {
   // A new source is a new player, the way a page would mount one.
-  if (params.source !== source) {
-    source = params.source;
-    i18n.replaceChildren(createPlayer(source));
+  const key = params.source === 'custom' ? `custom|${params.customSrc}|${params.customChapters}` : params.source;
+  if (key !== mounted) {
+    mounted = key;
+    i18n.replaceChildren(createPlayer(params.source, { src: params.customSrc, chapters: params.customChapters }));
   }
 
   wrapper.removeAttribute('style');
@@ -34,3 +36,4 @@ function render(params: WorkbenchParams): void {
 
 render(initialParams());
 onParamsChange(render);
+startReporting();

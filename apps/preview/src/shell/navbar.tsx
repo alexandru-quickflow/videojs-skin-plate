@@ -4,16 +4,20 @@ import { Button } from '@preview/shell/components/ui/button';
 import { useSidebar } from '@preview/shell/components/ui/sidebar';
 
 import { skin } from './config';
+import { Guide } from './guide';
+import type { WorkbenchParams } from './params';
 
 type NavbarProps = {
   /** The preview on its own, to open in a new tab. */
   previewUrl: string;
   /** The options panel this bar's toggle opens and closes. */
   optionsId: string;
+  /** The current settings, for the guide's code. */
+  params: WorkbenchParams;
 };
 
 /** The skin and links out. Everything else sits in the options panel. */
-export function Navbar({ previewUrl, optionsId }: NavbarProps) {
+export function Navbar({ previewUrl, optionsId, params }: NavbarProps) {
   const { isMobile, open, openMobile, toggleSidebar } = useSidebar();
 
   return (
@@ -33,6 +37,7 @@ export function Navbar({ previewUrl, optionsId }: NavbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-1">
+        <Guide params={params} />
         <Button
           variant="ghost"
           size="icon-sm"
