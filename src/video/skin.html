@@ -73,13 +73,13 @@
 </media-time-slider>
 </div>
 <div class="pl-foot">
-<div class="pl-time">
+<media-time-group class="pl-time">
 <media-time class="pl-time-current" type="current" toggle>
 </media-time>
-<span class="pl-time-sep" aria-hidden="true">/</span>
+<media-time-separator class="pl-time-sep">/</media-time-separator>
 <media-time class="pl-time-duration" type="duration">
 </media-time>
-</div>
+</media-time-group>
 <media-tooltip-group class="pl-controls">
 <media-play-button class="pl-btn pl-btn-play">
 <span class="pl-btn-glyph" aria-hidden="true">
@@ -159,9 +159,43 @@
 </media-playback-rate-radio-group>
 </media-menu-content>
 </media-menu>
-<media-captions-button class="pl-btn pl-btn-cc">
-<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
-</media-captions-button>
+<!-- Captions and Audio: menus of the media's tracks, hidden by Video.js when there are none to choose. -->
+<button type="button" class="pl-btn pl-btn-captions">
+<span class="pl-btn-glyph pl-captions-glyph" aria-hidden="true"><media-icon family="pl" name="cc" class="pl-icon"></media-icon></span>
+<span class="pl-btn-text"><span><media-text class="pl-captions-word" token="menu.captions">Captions</media-text> <span class="pl-btn-value" data-part="value"></span></span></span>
+</button>
+<media-menu side="top" align="end" class="pl-menu pl-btn-captions-menu">
+<media-menu-content class="pl-menu-content">
+<media-captions-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-captions-radio-group>
+</media-menu-content>
+</media-menu>
+<button type="button" class="pl-btn pl-btn-audio">
+<span class="pl-btn-text"><span><media-text token="menu.audio">Audio</media-text> <span class="pl-btn-value" data-part="value"></span></span></span>
+</button>
+<media-menu side="top" align="end" class="pl-menu pl-btn-audio-menu">
+<media-menu-content class="pl-menu-content">
+<media-audio-track-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-audio-track-radio-group>
+</media-menu-content>
+</media-menu>
+<media-airplay-button class="pl-btn pl-btn-glyph-key pl-btn-airplay">
+<span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="airplay" class="pl-icon"></media-icon></span>
+</media-airplay-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+<media-cast-button class="pl-btn pl-btn-glyph-key pl-btn-cast">
+<span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="cast" class="pl-icon"></media-icon></span>
+</media-cast-button>
 <media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <media-pip-button class="pl-btn pl-btn-pip">
 <span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="pip" class="pl-icon"></media-icon></span>
@@ -225,6 +259,20 @@
 </media-menu-radio-item>
 </template>
 </media-captions-radio-group>
+</media-menu-content>
+<media-menu-item class="pl-menu-item pl-menu-page" data-page="audio">
+<media-text token="menu.audio">Audio</media-text>
+<span class="pl-menu-hint"><span class="pl-btn-value" data-part="value"></span><span class="pl-menu-chevron" aria-hidden="true">&rsaquo;</span></span>
+</media-menu-item>
+<media-menu-content class="pl-menu-content" data-page-for="audio">
+<media-menu-item class="pl-menu-item pl-menu-back"><span class="pl-menu-chevron" aria-hidden="true">&lsaquo;</span> <media-text token="menu.audio">Audio</media-text></media-menu-item>
+<media-audio-track-radio-group class="pl-menu-group">
+<template>
+<media-menu-radio-item class="pl-menu-item">
+<span data-part="label"></span>
+</media-menu-radio-item>
+</template>
+</media-audio-track-radio-group>
 </media-menu-content>
 </media-menu-content>
 </media-menu>

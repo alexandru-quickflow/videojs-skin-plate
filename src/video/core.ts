@@ -24,12 +24,12 @@ import '@videojs/html/ui/slider-fill';
 import '@videojs/html/ui/slider-thumb';
 import '@videojs/html/ui/slider-preview';
 import '@videojs/html/ui/slider-thumbnail';
+import '@videojs/html/ui/thumbnail';
 import '@videojs/html/ui/slider-value';
 import '@videojs/html/ui/time-slider-chapter-title';
 import '@videojs/html/ui/mute-button';
 import '@videojs/html/ui/volume-slider';
 import '@videojs/html/ui/time';
-import '@videojs/html/ui/captions-button';
 import '@videojs/html/ui/fullscreen-button';
 import '@videojs/html/ui/popover';
 import '@videojs/html/ui/menu';
@@ -38,6 +38,11 @@ import '@videojs/html/ui/menu-radio-item';
 import '@videojs/html/ui/quality-radio-group';
 import '@videojs/html/ui/playback-rate-radio-group';
 import '@videojs/html/ui/captions-radio-group';
+import '@videojs/html/ui/audio-track-radio-group';
+import '@videojs/html/ui/airplay-button';
+import '@videojs/html/ui/cast-button';
+import '@videojs/html/ui/time-group';
+import '@videojs/html/ui/time-separator';
 import '@videojs/html/ui/menu-item';
 import '@videojs/html/ui/pip-button';
 import '@videojs/html/ui/tooltip';
@@ -64,6 +69,9 @@ import expandIcon from '@phosphor-icons/core/assets/bold/corners-out-bold.svg?ra
 import collapseIcon from '@phosphor-icons/core/assets/bold/corners-in-bold.svg?raw';
 import moreIcon from '@phosphor-icons/core/assets/bold/dots-three-bold.svg?raw';
 import pipIcon from '@phosphor-icons/core/assets/bold/picture-in-picture-bold.svg?raw';
+import airplayIcon from '@phosphor-icons/core/assets/bold/airplay-bold.svg?raw';
+import castIcon from '@phosphor-icons/core/assets/bold/screencast-bold.svg?raw';
+import ccIcon from '@phosphor-icons/core/assets/bold/closed-captioning-bold.svg?raw';
 import './chapters';
 
 // The play key's glyph, and on small players the icons that stand in for the words of
@@ -79,4 +87,7 @@ registerIcons('pl', {
   collapse: collapseIcon,
   more: moreIcon,
   pip: pipIcon,
+  airplay: airplayIcon,
+  cast: castIcon,
+  cc: ccIcon,
 });

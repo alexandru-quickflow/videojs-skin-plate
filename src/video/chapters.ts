@@ -135,7 +135,15 @@ class ChaptersElement extends UIElement {
       title.dir = 'auto';
       title.textContent = cue.text;
 
-      button.append(num, title);
+      // The chapter's frame from the storyboard, well in so it is past any title card.
+      const next = cues[i + 1]?.startTime ?? cue.startTime + 14;
+      const thumb = document.createElement('media-thumbnail');
+      thumb.className = 'pl-chapter-thumb';
+      thumb.setAttribute('time', String(cue.startTime + Math.min(7, (next - cue.startTime) / 2)));
+      thumb.setAttribute('loading', 'lazy');
+      thumb.setAttribute('aria-hidden', 'true');
+
+      button.append(num, title, thumb);
       item.append(button);
       list.append(item);
     });

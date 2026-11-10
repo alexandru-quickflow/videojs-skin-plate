@@ -637,6 +637,11 @@
         border-top: 0;
         border-inline-start: 1px solid var(--pl-line);
         margin-inline-start: var(--pl-gap);
+        /* The picture sets the row's height; a long index scrolls inside it instead of stretching it. */
+        contain: size;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--pl-line-strong) transparent;
       }
     }
 
@@ -744,7 +749,8 @@
       content: "";
       position: absolute;
       inset-inline-start: 4px;
-      top: 50%;
+      /* Level with the name, the first line, whatever sits under it. */
+      top: calc(8px + 0.6lh);
       width: 5px;
       height: 5px;
       border-radius: 50%;
@@ -793,6 +799,41 @@
       .pl-chapter-title {
         font-size: 16px;
         white-space: nowrap;
+      }
+    }
+
+    /* Each chapter's frame from the storyboard, under its name in the index column. Video.js scales
+       the tile to these widths. Left out in the strip, and when the index has more than five chapters. */
+    .pl-chapter-thumb {
+      grid-column: 2;
+      display: block;
+      min-width: 96px;
+      max-width: 96px;
+      margin-top: 6px;
+      overflow: hidden;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px var(--pl-line-strong);
+      opacity: 0.78;
+      transition:
+        opacity var(--media-duration-fast) ease-out,
+        box-shadow var(--media-duration-fast) ease-out;
+    }
+
+    .pl-chapter:is([data-active], :hover, :focus-visible) .pl-chapter-thumb {
+      opacity: 1;
+    }
+
+    .pl-chapter[data-active] .pl-chapter-thumb {
+      box-shadow: 0 0 0 1px var(--pl-teal);
+    }
+
+    .pl-chapter-list:has(> li:nth-child(6)) .pl-chapter-thumb {
+      display: none;
+    }
+
+    @container pl (width < 760px) {
+      .pl-chapter-thumb {
+        display: none;
       }
     }
 
@@ -1360,7 +1401,7 @@
     }
 
     /* A control the media or the browser cannot use (no captions, no fullscreen on iOS) is left out. */
-    .pl-btn:is([data-availability="unavailable"], [data-availability="unsupported"]) {
+    .pl-btn:is([data-availability="unavailable"], [data-availability="unsupported"], [data-hidden], [hidden]) {
       display: none;
     }
 
@@ -1393,11 +1434,88 @@
       margin-inline-end: 6px;
     }
 
-    .pl-btn-cc[data-active] {
+    /* Audio on the row only on the widest players; elsewhere it waits in More's menu on phones. */
+    @container pl (width < 1360px) {
+      .pl-controls > .pl-btn-audio,
+      .pl-btn-audio-menu {
+        display: none !important;
+      }
+    }
+
+    /* The captions key names its track only where the row has room for it. */
+    @container pl (width < 1500px) {
+      .pl-btn-captions .pl-btn-value {
+        display: none;
+      }
+    }
+
+    /* Below the widest players the row is full: Mute and Captions become their glyphs, as on
+       phones. Captions keeps its word for screen readers; Mute is named by Video.js. */
+    .pl-captions-glyph {
+      display: none;
+    }
+
+    @container pl (600px <= width < 1360px) {
+      .pl-btn-mute .pl-only-narrow,
+      .pl-captions-glyph {
+        display: grid;
+        width: 18px;
+        height: 18px;
+      }
+
+      .pl-btn-mute .pl-btn-text {
+        display: none;
+      }
+
+      .pl-btn-mute .pl-mute-off,
+      .pl-btn-mute[data-muted] .pl-mute-on {
+        visibility: hidden;
+      }
+
+      .pl-btn-mute[data-muted] .pl-mute-off {
+        visibility: visible;
+      }
+
+      .pl-btn-captions .pl-btn-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .pl-btn-mute,
+      .pl-btn-captions {
+        padding-inline: 0;
+        color: var(--pl-paper);
+      }
+    }
+
+    /* Narrower still, Speed shows only its rate; the word stays in its name. */
+    @container pl (600px <= width < 960px) {
+      .pl-controls > .pl-btn-rate .pl-btn-text media-text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    }
+
+    /* Audio is a choice only with two tracks or more: with one, the key and More's page leave. */
+    .pl-btn-audio:has(+ .pl-btn-audio-menu media-audio-track-radio-group:not(:has(media-menu-radio-item + media-menu-radio-item))),
+    .pl-menu-page[data-page="audio"]:has(+ [data-page-for="audio"] media-audio-track-radio-group:not(:has(media-menu-radio-item + media-menu-radio-item))) {
+      display: none;
+    }
+
+    /* Captions on: the key turns the accent and gets a short underline, from the menu's own state. */
+    .pl-btn-captions:has(+ .pl-btn-captions-menu media-captions-radio-group[data-active]) {
       color: var(--pl-teal);
     }
 
-    .pl-btn-cc[data-active]::after {
+    .pl-btn-captions:has(+ .pl-btn-captions-menu media-captions-radio-group[data-active])::after {
       content: "";
       position: absolute;
       bottom: 8px;
@@ -1543,8 +1661,10 @@
         margin-inline-start: auto;
       }
 
-      .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-cc, .pl-sep),
+      .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-captions, .pl-btn-audio, .pl-btn-airplay, .pl-btn-cast, .pl-sep),
       .pl-rate-menu:not(.pl-rate-menu-more),
+      .pl-btn-captions-menu,
+      .pl-btn-audio-menu,
       .pl-volume-slider {
         display: none;
       }
@@ -1594,9 +1714,9 @@
       }
     }
 
-    /* Between 600 and 640px the volume slider would be too short to use; the Mute key and
+    /* Between 600 and 700px the volume slider would be too short to use; the Mute key and
        the Up and Down arrows still set the volume. */
-    @container pl (600px <= width < 640px) {
+    @container pl (600px <= width < 700px) {
       .pl-volume-slider {
         display: none;
       }
@@ -1684,6 +1804,7 @@
 
     /* The rendition in the key only when the row has room for it; the menu always shows it. */
     @container pl (width < 1360px) {
+      .pl-btn-captions .pl-btn-value,
       .pl-quality-value {
         display: none;
       }
@@ -1803,12 +1924,18 @@
     /* ------------------------------------------------------------------ Picture-in-picture and tooltips */
 
     /* PiP has no short word, so it is a glyph key, named in its tooltip. */
-    .pl-btn-pip {
+    .pl-btn-pip,
+    .pl-btn-glyph-key {
       padding-inline: 0;
       color: var(--pl-paper);
     }
 
-    .pl-btn-pip .pl-btn-glyph {
+    .pl-btn-glyph-key[data-airplay-state="connected"],
+    .pl-btn-glyph-key[data-cast-state="connected"] {
+      color: var(--pl-teal);
+    }
+
+    :is(.pl-btn-pip, .pl-btn-glyph-key) .pl-btn-glyph {
       width: 18px;
       height: 18px;
     }
@@ -1819,7 +1946,7 @@
 
     /* Phones play picture-in-picture from their own controls; the row keeps four keys. */
     @container pl (width < 600px) {
-      .pl-controls > .pl-btn-pip {
+      .pl-controls > :is(.pl-btn-pip, .pl-btn-glyph-key) {
         display: none;
       }
     }
