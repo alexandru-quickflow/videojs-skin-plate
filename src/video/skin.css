@@ -20,34 +20,35 @@
    *   --plate-number      the plate's number in the head, a string: "02"
    *   --plate-word-ready, -playing, -paused, -loading, -ended, -error: the status words
    * Or pick a theme with data-plate-theme="night | blueprint | signal | auto" on the player
-   * or an ancestor.
+   * or an ancestor. The nearest theme wins, and your properties win over any theme.
    */
   .media-skin.pl {
-    --media-font-family: var(--plate-font-mono, "JetBrains Mono", ui-monospace, "SF Mono", monospace);
-    --media-accent-color: var(--plate-accent, #2bd4bd);
-    --media-video-border-radius: var(--plate-radius-sm, 10px);
-
-    --pl-ink: var(--plate-ink, #04080b);
-    --pl-surface: var(--plate-surface, #0c1013);
-    --pl-raised: var(--plate-raised, #151a1c);
-    --pl-paper: var(--plate-print, #e9f2f0);
-    --pl-mute: color-mix(in srgb, var(--pl-paper) 70%, transparent);
-    --pl-faint: color-mix(in srgb, var(--pl-paper) 56%, transparent);
-    --pl-line: color-mix(in srgb, var(--pl-paper) 10%, transparent);
-    --pl-line-strong: color-mix(in srgb, var(--pl-paper) 22%, transparent);
+    /* Each value: your property first, then the nearest theme's, then night. */
+    --pl-ink: var(--plate-ink, var(--pl-t-ink, #04080b));
+    --pl-surface: var(--plate-surface, var(--pl-t-surface, #0c1013));
+    --pl-raised: var(--plate-raised, var(--pl-t-raised, #151a1c));
+    --pl-paper: var(--plate-print, var(--pl-t-print, #e9f2f0));
+    --pl-mute: color-mix(in srgb, var(--pl-paper) var(--pl-t-mute, 70%), transparent);
+    --pl-faint: color-mix(in srgb, var(--pl-paper) var(--pl-t-faint, 56%), transparent);
+    --pl-line: color-mix(in srgb, var(--pl-paper) var(--pl-t-line, 10%), transparent);
+    --pl-line-strong: color-mix(in srgb, var(--pl-paper) var(--pl-t-line-strong, 22%), transparent);
     --pl-line-soft: color-mix(in srgb, var(--pl-paper) 6%, transparent);
     /* Slider tracks: at least 3:1 against the surface (WCAG 1.4.11). */
-    --pl-track: color-mix(in srgb, var(--pl-paper) 40%, transparent);
+    --pl-track: color-mix(in srgb, var(--pl-paper) var(--pl-t-track, 40%), transparent);
     /* Brighter than the track, quieter than the played bar. */
-    --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 50%, transparent);
+    --pl-track-buffer: color-mix(in srgb, var(--pl-paper) var(--pl-t-buffer, 50%), transparent);
 
     /* Two saturated colours: the accent is where you are, the playhead is time moving. */
-    --pl-teal: var(--plate-accent, #2bd4bd);
-    --pl-hot: var(--plate-playhead, #ff5f45);
-    --pl-on-teal: var(--plate-on-accent, #04171a);
+    --pl-teal: var(--plate-accent, var(--pl-t-accent, #2bd4bd));
+    --pl-hot: var(--plate-playhead, var(--pl-t-playhead, #ff5f45));
+    --pl-on-teal: var(--plate-on-accent, var(--pl-t-on-accent, #04171a));
+    /* Hover lifts the accent toward the print's opposite: lighter on night, darker on paper. */
+    --pl-teal-hover: color-mix(in srgb, var(--pl-teal), var(--pl-t-lift, white) 25%);
 
     --pl-serif: var(--plate-font-serif, "Newsreader", Georgia, "Times New Roman", serif);
-    --pl-mono: var(--media-font-family);
+    --pl-mono: var(--plate-font-mono, "JetBrains Mono", ui-monospace, "SF Mono", monospace);
+    --pl-label-weight: var(--pl-t-label-weight, 400);
+    --pl-serif-weight: var(--pl-t-serif-weight, 300);
 
     --pl-radius: var(--plate-radius, 16px);
     --pl-radius-sm: var(--plate-radius-sm, 10px);
@@ -56,80 +57,118 @@
     --pl-bezel: clamp(10px, 1.6cqi, 16px);
     --pl-index-w: clamp(190px, 27cqi, 290px);
     --pl-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-    --pl-grain: 0.18;
-    --pl-grid: linear-gradient(transparent, transparent);
+    --pl-grain: var(--pl-t-grain, 0.18);
+    /* A drafting grid in the accent, off on night (0%). */
+    --pl-grid-ink: color-mix(in srgb, var(--pl-teal) var(--pl-t-grid, 0%), transparent);
+    --pl-grid:
+      linear-gradient(var(--pl-grid-ink) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, var(--pl-grid-ink) 1px, transparent 1px) 0 0 / 24px 24px;
+
+    --media-font-family: var(--pl-mono);
+    --media-accent-color: var(--pl-teal);
+    color-scheme: var(--pl-t-scheme, dark);
   }
 
-  /* Blueprint: white drafting paper, a fine grid, blue ink, a red playhead. */
-  :where([data-plate-theme="blueprint"]) .media-skin.pl,
-  .media-skin.pl[data-plate-theme="blueprint"] {
-    --plate-ink: #e9eef5;
-    --plate-surface: #f8fafc;
-    --plate-raised: #ffffff;
-    --plate-print: #0c2d55;
-    --plate-accent: #1d57b8;
-    --plate-on-accent: #ffffff;
-    --plate-playhead: #c7342a;
-    /* On a light ground the same mixes read weaker: raise them back to AA. */
-    --pl-faint: color-mix(in srgb, var(--pl-paper) 85%, transparent);
-    --pl-mute: color-mix(in srgb, var(--pl-paper) 92%, transparent);
-    /* Dark print on white reads thinner than light print on dark: one weight up. */
-    --pl-label-weight: 500;
-    --pl-serif-weight: 400;
-    --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
-    --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
-    --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
-    --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
-    --pl-grain: 0;
-    --pl-grid:
-      linear-gradient(color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
-      linear-gradient(90deg, color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
-    color-scheme: light;
+  /*
+   * Themes set private --pl-t-* values on the element that carries data-plate-theme. Custom
+   * properties inherit, so the nearest theme wins, and every theme sets the full list so it
+   * replaces an outer one completely. Your --plate-* properties beat any theme.
+   */
+  [data-plate-theme="night"],
+  [data-plate-theme="signal"],
+  [data-plate-theme="auto"] {
+    --pl-t-ink: #04080b;
+    --pl-t-surface: #0c1013;
+    --pl-t-raised: #151a1c;
+    --pl-t-print: #e9f2f0;
+    --pl-t-accent: #2bd4bd;
+    --pl-t-on-accent: #04171a;
+    --pl-t-playhead: #ff5f45;
+    --pl-t-lift: white;
+    --pl-t-mute: 70%;
+    --pl-t-faint: 56%;
+    --pl-t-line: 10%;
+    --pl-t-line-strong: 22%;
+    --pl-t-track: 40%;
+    --pl-t-buffer: 50%;
+    --pl-t-mute-more: 90%;
+    --pl-t-faint-more: 80%;
+    --pl-t-label-weight: 400;
+    --pl-t-serif-weight: 300;
+    --pl-t-grain: 0.18;
+    --pl-t-grid: 0%;
+    --pl-t-scheme: dark;
   }
 
   /* Signal: the night plate with an amber accent and a blue playhead. */
-  :where([data-plate-theme="signal"]) .media-skin.pl,
-  .media-skin.pl[data-plate-theme="signal"] {
-    --plate-accent: #ffb020;
-    --plate-on-accent: #1d1300;
-    --plate-playhead: #4aa8ff;
+  [data-plate-theme="signal"] {
+    --pl-t-accent: #ffb020;
+    --pl-t-on-accent: #1d1300;
+    --pl-t-playhead: #4aa8ff;
   }
 
-  /* Auto: night in a dark system theme, blueprint in a light one. */
+  /* Blueprint: white drafting paper, a fine grid, blue ink, a red playhead.
+     Auto uses the same values in a light system theme. */
+  [data-plate-theme="blueprint"] {
+    --pl-t-ink: #e9eef5;
+    --pl-t-surface: #f8fafc;
+    --pl-t-raised: #ffffff;
+    --pl-t-print: #0c2d55;
+    --pl-t-accent: #1d57b8;
+    --pl-t-on-accent: #ffffff;
+    --pl-t-playhead: #c7342a;
+    --pl-t-lift: black;
+    /* On a light ground the same mixes read weaker: raise them back to AA. */
+    --pl-t-mute: 92%;
+    --pl-t-faint: 85%;
+    --pl-t-line: 14%;
+    --pl-t-line-strong: 30%;
+    --pl-t-track: 52%;
+    --pl-t-buffer: 64%;
+    --pl-t-mute-more: 100%;
+    --pl-t-faint-more: 96%;
+    /* Dark print on white reads thinner than light print on dark: one weight up. */
+    --pl-t-label-weight: 500;
+    --pl-t-serif-weight: 400;
+    --pl-t-grain: 0;
+    --pl-t-grid: 4%;
+    --pl-t-scheme: light;
+  }
+
   @media (prefers-color-scheme: light) {
-    :where([data-plate-theme="auto"]) .media-skin.pl,
-    .media-skin.pl[data-plate-theme="auto"] {
-      --plate-ink: #e9eef5;
-      --plate-surface: #f8fafc;
-      --plate-raised: #ffffff;
-      --plate-print: #0c2d55;
-      --plate-accent: #1d57b8;
-      --plate-on-accent: #ffffff;
-      --plate-playhead: #c7342a;
-      /* On a light ground the same mixes read weaker: raise them back to AA. */
-      --pl-faint: color-mix(in srgb, var(--pl-paper) 85%, transparent);
-      --pl-mute: color-mix(in srgb, var(--pl-paper) 92%, transparent);
-      /* Dark print on white reads thinner than light print on dark: one weight up. */
-      --pl-label-weight: 500;
-      --pl-serif-weight: 400;
-      --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
-      --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
-      --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
-      --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
-      --pl-grain: 0;
-      --pl-grid:
-        linear-gradient(color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
-        linear-gradient(90deg, color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
-      color-scheme: light;
+    /* Keep in step with blueprint above. */
+    [data-plate-theme="auto"] {
+      --pl-t-ink: #e9eef5;
+      --pl-t-surface: #f8fafc;
+      --pl-t-raised: #ffffff;
+      --pl-t-print: #0c2d55;
+      --pl-t-accent: #1d57b8;
+      --pl-t-on-accent: #ffffff;
+      --pl-t-playhead: #c7342a;
+      --pl-t-lift: black;
+      --pl-t-mute: 92%;
+      --pl-t-faint: 85%;
+      --pl-t-line: 14%;
+      --pl-t-line-strong: 30%;
+      --pl-t-track: 52%;
+      --pl-t-buffer: 64%;
+      --pl-t-mute-more: 100%;
+      --pl-t-faint-more: 96%;
+      --pl-t-label-weight: 500;
+      --pl-t-serif-weight: 400;
+      --pl-t-grain: 0;
+      --pl-t-grid: 4%;
+      --pl-t-scheme: light;
     }
   }
 }
 
 @layer base.preferences {
+  /* Higher contrast raises each theme's own mix, so a light theme never gets weaker. */
   @media (prefers-contrast: more) {
     .media-skin.pl {
-      --pl-mute: color-mix(in srgb, var(--pl-paper) 90%, transparent);
-      --pl-faint: color-mix(in srgb, var(--pl-paper) 80%, transparent);
+      --pl-mute: color-mix(in srgb, var(--pl-paper) var(--pl-t-mute-more, 90%), transparent);
+      --pl-faint: color-mix(in srgb, var(--pl-paper) var(--pl-t-faint-more, 80%), transparent);
       --pl-line: color-mix(in srgb, var(--pl-paper) 35%, transparent);
       --pl-line-strong: color-mix(in srgb, var(--pl-paper) 55%, transparent);
     }
@@ -390,7 +429,7 @@
       content: "";
       display: block;
       aspect-ratio: 16 / 9;
-      border-radius: var(--media-video-border-radius);
+      border-radius: var(--pl-radius-sm);
       background: #000;
     }
 
@@ -404,7 +443,7 @@
       width: auto !important;
       height: auto !important;
       overflow: hidden;
-      border-radius: var(--media-video-border-radius);
+      border-radius: var(--pl-radius-sm);
     }
 
     .pl-poster {
@@ -412,7 +451,7 @@
       inset: var(--pl-bezel);
       z-index: 1;
       overflow: hidden;
-      border-radius: var(--media-video-border-radius);
+      border-radius: var(--pl-radius-sm);
       background: #000;
     }
 
@@ -488,7 +527,7 @@
       display: grid;
       place-items: center;
       pointer-events: none;
-      border-radius: var(--media-video-border-radius);
+      border-radius: var(--pl-radius-sm);
       background: color-mix(in srgb, var(--pl-ink) 40%, transparent);
     }
 
@@ -1196,7 +1235,7 @@
     @media (hover: hover) and (pointer: fine) {
       .pl-btn-play:hover {
         color: var(--pl-on-teal);
-        background: color-mix(in srgb, var(--pl-teal), white 25%);
+        background: var(--pl-teal-hover);
       }
     }
 
@@ -1690,7 +1729,8 @@
       font-family: var(--pl-mono);
       font-size: 0.9em;
       line-height: 1.45;
-      color: var(--pl-paper);
+      /* Captions sit on the picture, so they stay light on dark in every theme. */
+      color: #e9f2f0;
       background: rgb(4 8 11 / 0.82);
     }
 

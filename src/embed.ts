@@ -19,7 +19,7 @@ export interface PlateOptions {
   /** A built-in theme. `auto` follows the system: night when dark, blueprint when light. */
   theme?: 'night' | 'blueprint' | 'signal' | 'auto';
   /** The plate's number in the head, such as "02". */
-  number?: string;
+  number?: string | number;
   /** Where the chapter index sits on wide players, or none. */
   index?: 'end' | 'start' | 'none';
   /** `sparse` keeps only the tall tick every tenth of the ruler. */
@@ -37,7 +37,29 @@ const MEDIA_PLACEHOLDER = '<!-- Add a compatible media component here. -->';
 const attr = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
-/** Replace `host`'s content with a Plate player. Returns the `<video-player>` element. */
+/** A CSS string for `content`: quotes, backslashes and line breaks escaped, control characters dropped. */
+const cssString = (value: string): string =>
+  `"${value
+    .replace(/[\\"]/g, '\\$&')
+    .replace(/\r\n?|\n/g, '\\a ')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, '')}"`;
+
+const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
+const INDEXES = ['end', 'start', 'none'] as const;
+const STATES = ['ready', 'playing', 'paused', 'loading', 'ended', 'error'] as const;
+
+const oneOf = <T extends string>(list: readonly T[], value: unknown, name: string): T | undefined => {
+  if (value === undefined) return undefined;
+  if ((list as readonly unknown[]).includes(value)) return value as T;
+  console.warn(`Plate: ${name} must be one of ${list.join(', ')}; got ${String(value)}.`);
+  return undefined;
+};
+
+/**
+ * Replace `host`'s content with a Plate player. Returns the `<video-player>` element.
+ * To remove it, empty the host (`host.replaceChildren()`): the skin's elements clean up when disconnected.
+ */
 export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElement {
   const player = document.createElement('video-player');
   if (options.poster) player.setAttribute('poster', options.poster);
@@ -53,17 +75,23 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   );
 
   // Options: the theme and properties go on the player, the layout switches on the skin's container.
-  if (options.theme && options.theme !== 'night') player.dataset.plateTheme = options.theme;
+  // An explicit night also resets a theme set on an ancestor.
+  const theme = oneOf(THEMES, options.theme, 'theme');
+  if (theme) player.dataset.plateTheme = theme;
   const container = player.querySelector<HTMLElement>('.media-skin.pl');
   if (container) {
-    if (options.index && options.index !== 'end') container.dataset.index = options.index;
+    const index = oneOf(INDEXES, options.index, 'index');
+    if (index && index !== 'end') container.dataset.index = index;
     if (options.ruler === 'sparse') container.dataset.ruler = 'sparse';
     if (options.head === false) container.dataset.head = 'none';
   }
-  // Strings in custom properties are read by `content`, so they go in quoted.
-  if (options.number) player.style.setProperty('--plate-number', JSON.stringify(options.number));
+  // Strings in custom properties are read by `content`, so they go in as CSS strings.
+  if (options.number !== undefined && options.number !== '') {
+    player.style.setProperty('--plate-number', cssString(String(options.number)));
+  }
   for (const [state, word] of Object.entries(options.words ?? {})) {
-    if (word) player.style.setProperty(`--plate-word-${state}`, JSON.stringify(word));
+    if (!oneOf(STATES, state, 'a words key') || typeof word !== 'string' || !word) continue;
+    player.style.setProperty(`--plate-word-${state}`, cssString(word));
   }
   for (const [name, value] of Object.entries(options.style ?? {})) {
     if (name.startsWith('--plate-')) player.style.setProperty(name, value);
