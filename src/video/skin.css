@@ -71,16 +71,19 @@
     --plate-on-accent: #ffffff;
     --plate-playhead: #c7342a;
     /* On a light ground the same mixes read weaker: raise them back to AA. */
-    --pl-faint: color-mix(in srgb, var(--pl-paper) 70%, transparent);
-    --pl-mute: color-mix(in srgb, var(--pl-paper) 82%, transparent);
+    --pl-faint: color-mix(in srgb, var(--pl-paper) 85%, transparent);
+    --pl-mute: color-mix(in srgb, var(--pl-paper) 92%, transparent);
+    /* Dark print on white reads thinner than light print on dark: one weight up. */
+    --pl-label-weight: 500;
+    --pl-serif-weight: 400;
     --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
     --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
     --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
     --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
     --pl-grain: 0;
     --pl-grid:
-      linear-gradient(color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
-      linear-gradient(90deg, color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
+      linear-gradient(color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
     color-scheme: light;
   }
 
@@ -104,16 +107,19 @@
       --plate-on-accent: #ffffff;
       --plate-playhead: #c7342a;
       /* On a light ground the same mixes read weaker: raise them back to AA. */
-      --pl-faint: color-mix(in srgb, var(--pl-paper) 70%, transparent);
-      --pl-mute: color-mix(in srgb, var(--pl-paper) 82%, transparent);
+      --pl-faint: color-mix(in srgb, var(--pl-paper) 85%, transparent);
+      --pl-mute: color-mix(in srgb, var(--pl-paper) 92%, transparent);
+      /* Dark print on white reads thinner than light print on dark: one weight up. */
+      --pl-label-weight: 500;
+      --pl-serif-weight: 400;
       --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
       --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
       --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
       --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
       --pl-grain: 0;
       --pl-grid:
-        linear-gradient(color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
-        linear-gradient(90deg, color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
+        linear-gradient(color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(90deg, color-mix(in srgb, #1d57b8 4%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
       color-scheme: light;
     }
   }
@@ -710,7 +716,7 @@
     .pl-chapter-title {
       min-width: 0;
       font-family: var(--pl-serif);
-      font-weight: 300;
+      font-weight: var(--pl-serif-weight, 300);
       font-size: clamp(17px, 2.1cqi, 22px);
       line-height: 1.2;
       letter-spacing: -0.005em;
@@ -1082,7 +1088,7 @@
       gap: 0.25em;
       font-family: var(--pl-serif);
       font-style: italic;
-      font-weight: 300;
+      font-weight: var(--pl-serif-weight, 300);
       font-size: clamp(28px, 4.4cqi, 48px);
       line-height: 1;
       letter-spacing: -0.01em;
@@ -1629,6 +1635,11 @@
        mono labels go plain. */
     :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn, .pl-indicator, .pl-chapter-num) {
       letter-spacing: 0;
+    }
+
+    /* The mono labels and keys take the theme's label weight. */
+    :is(.pl-head, .pl-label, .pl-btn, .pl-ruler-mark, .pl-chapter-num, .pl-indicator) {
+      font-weight: var(--pl-label-weight, 400);
     }
 
     /* ------------------------------------------------------------------ Options on the player */
