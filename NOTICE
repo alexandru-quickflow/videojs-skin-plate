@@ -1,0 +1,17 @@
+Plate, a Video.js skin
+Copyright 2026 Alexandru Trofaniuc, Quick Flow (quickflow.dev)
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This skin bundles or loads the following third-party work:
+
+- Video.js v10 (@videojs/html, @videojs/core and related packages)
+  Apache License 2.0. https://github.com/videojs/v10
+- Newsreader, by Production Type
+  SIL Open Font License 1.1. Served through @fontsource/newsreader.
+- JetBrains Mono, by JetBrains
+  SIL Open Font License 1.1. Served through @fontsource/jetbrains-mono.
+- Phosphor Icons, by Phosphor Icons
+  MIT License. Served through @phosphor-icons/core.
+- @videojs/mux-video and hls.js, used by the embed build
+  Apache License 2.0.

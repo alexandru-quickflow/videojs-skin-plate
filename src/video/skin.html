@@ -1,8 +1,8 @@
 <media-container class="media-skin media-container media-video pl" data-theme="scaffold" data-preset="video">
 <div class="pl-plate">
-<div class="pl-head" aria-hidden="true">
-<span class="pl-tag"><media-text token="pl.plate">Plate</media-text> 01 <span class="pl-dot">&middot;</span> <media-title class="pl-media-title"></media-title></span>
-<span class="pl-status"><media-text token="pl.status">Status</media-text> <span class="pl-status-word"></span></span>
+<div class="pl-head">
+<span class="pl-tag"><span aria-hidden="true"><media-text token="pl.plate">Plate</media-text> 01 <span class="pl-dot">&middot;</span> </span><media-title class="pl-media-title"></media-title></span>
+<span class="pl-status" aria-hidden="true"><media-text token="pl.status">Status</media-text> <span class="pl-status-word"></span></span>
 </div>
 <div class="pl-body">
 <div class="pl-stage">
@@ -35,10 +35,10 @@
 </media-status-indicator>
 </div>
 </div>
-<div class="pl-index">
-<media-text class="pl-label pl-index-label" token="pl.index" aria-hidden="true">Index</media-text>
+<nav class="pl-index">
+<media-text class="pl-label pl-index-label" token="pl.index">Index</media-text>
 <pl-chapters class="pl-chapters"></pl-chapters>
-</div>
+</nav>
 </div>
 <div class="pl-ruler">
 <media-time-slider class="pl-time-slider" thumb-alignment="edge">
@@ -121,7 +121,7 @@
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
 </media-captions-button>
 <media-fullscreen-button class="pl-btn pl-btn-full">
-<span class="pl-btn-text" aria-hidden="true"><media-text token="status.fullscreen">Fullscreen</media-text></span>
+<span class="pl-btn-text" aria-hidden="true"><media-text class="pl-full-enter" token="status.fullscreen">Fullscreen</media-text><media-text class="pl-full-exit" token="pl.exit">Exit</media-text></span>
 </media-fullscreen-button>
 </div>
 </div>

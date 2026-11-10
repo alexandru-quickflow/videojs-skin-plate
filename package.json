@@ -1,6 +1,9 @@
 {
   "name": "plate",
   "version": "0.0.0",
+  "description": "Plate, a Video.js v10 skin drawn like a technical plate, with a chapter index and a ruler timeline.",
+  "license": "Apache-2.0",
+  "author": "Alexandru Trofaniuc, Quick Flow (https://quickflow.dev)",
   "private": true,
   "type": "module",
   "scripts": {

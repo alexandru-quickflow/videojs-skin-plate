@@ -21,6 +21,9 @@
     --pl-line: rgb(224 240 238 / 0.1);
     --pl-line-strong: rgb(224 240 238 / 0.22);
     --pl-line-soft: rgb(224 240 238 / 0.06);
+    /* Slider tracks: at least 3:1 against the surface (WCAG 1.4.11). */
+    --pl-track: rgb(224 240 238 / 0.4);
+    --pl-track-buffer: rgb(224 240 238 / 0.62);
 
     /* Two saturated colours: teal is where you are, hot is the moving playhead. */
     --pl-teal: var(--media-accent-color, #2bd4bd);
@@ -741,7 +744,7 @@
       isolation: isolate;
       overflow: hidden;
       border-radius: 99px;
-      background: var(--pl-line);
+      background: var(--pl-track);
       transition: height var(--media-duration-fast) var(--pl-ease);
     }
 
@@ -761,7 +764,7 @@
         calc(100% - var(--media-slider-buffer, 0%)),
         calc(100% - var(--media-slider-chapter-end, 100%) + var(--pl-chapter-gap))
       );
-      background: var(--pl-line-strong);
+      background: var(--pl-track-buffer);
     }
 
     .pl-time-slider-fill {
@@ -1074,6 +1077,27 @@
       visibility: visible;
     }
 
+    /* Play and Pause share a width so the key holds still while playing; Replay, often the
+       longest word, takes its space only at the end. */
+    .pl-btn-play:not([data-ended]) .pl-play-restart,
+    .pl-btn-play[data-ended] :is(.pl-play-play, .pl-play-pause) {
+      display: none;
+    }
+
+    .pl-btn-full .pl-full-exit,
+    .pl-btn-full[data-fullscreen] .pl-full-enter {
+      visibility: hidden;
+    }
+
+    .pl-btn-full[data-fullscreen] .pl-full-exit {
+      visibility: visible;
+    }
+
+    /* A control the media or the browser cannot use (no captions, no fullscreen on iOS) is left out. */
+    .pl-btn:is([data-availability="unavailable"], [data-availability="unsupported"]) {
+      display: none;
+    }
+
     .pl-btn-mute .pl-mute-off,
     .pl-btn-mute[data-muted] .pl-mute-on {
       visibility: hidden;
@@ -1148,7 +1172,7 @@
       height: 2px;
       overflow: hidden;
       border-radius: 99px;
-      background: var(--pl-line-strong);
+      background: var(--pl-track);
     }
 
     .pl-volume-fill {
@@ -1295,6 +1319,17 @@
       }
     }
 
+    /* ------------------------------------------------------------------ Captions */
+
+    /* For a <video> in the page. A media element with its own shadow root keeps its captions there. */
+    video::cue {
+      font-family: var(--pl-mono);
+      font-size: 0.9em;
+      line-height: 1.45;
+      color: var(--pl-paper);
+      background: rgb(4 8 11 / 0.82);
+    }
+
     /* ------------------------------------------------------------------ Misc */
 
     .pl-status-announcer {
@@ -1309,8 +1344,18 @@
     /* ------------------------------------------------------------------ Preferences */
 
     @media (prefers-reduced-motion: reduce) {
+      /* No spinning: a slow fade still says something is loading. */
       .pl-spinner {
-        animation: none;
+        animation: pl-breathe 1.8s ease-in-out infinite alternate;
+      }
+    }
+
+    @keyframes pl-breathe {
+      from {
+        opacity: 0.35;
+      }
+      to {
+        opacity: 1;
       }
     }
 
@@ -1351,6 +1396,28 @@
       .pl-time-slider-thumb::after {
         forced-color-adjust: none;
         background: Highlight;
+      }
+
+      /* Keep the length of each slider visible: system colours drop the track backgrounds. */
+      .pl-time-slider-track,
+      .pl-volume-track {
+        forced-color-adjust: none;
+        background: GrayText;
+      }
+
+      .pl-time-slider-buffer {
+        forced-color-adjust: none;
+        background: CanvasText;
+      }
+
+      .pl-ruler-mark[data-active] {
+        forced-color-adjust: none;
+        color: Highlight;
+      }
+
+      .pl-status-word::before {
+        forced-color-adjust: none;
+        background: CanvasText;
       }
     }
   }
