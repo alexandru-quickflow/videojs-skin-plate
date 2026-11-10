@@ -274,7 +274,8 @@
       display: inline-flex;
       flex-shrink: 0;
       align-items: center;
-      gap: 4px;
+      /* With the letter spacing after "Status", the dot sits as far from both words. */
+      gap: 5px;
     }
 
     .pl-status-word {
@@ -290,6 +291,8 @@
       height: 6px;
       border-radius: 50%;
       background: var(--pl-line-strong);
+      /* Centred on the capitals rather than on the line box, which includes room for descenders. */
+      translate: 0 -0.07em;
     }
 
     .pl-status-word::after {
