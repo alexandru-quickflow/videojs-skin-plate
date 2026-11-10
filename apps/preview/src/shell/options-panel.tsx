@@ -21,6 +21,8 @@ import { locales } from './config';
 import {
   ASPECT_RATIOS,
   COLOR_SCHEMES,
+  THEMES,
+  type Theme,
   hasAspectRatio,
   localeLabel,
   PLAYER_WIDTH,
@@ -120,6 +122,12 @@ export function OptionsPanel({ id, params, onParamsChange, preferences }: Option
             value={params.dir}
             onChange={(value) => onParamsChange({ dir: value as TextDirection })}
             options={TEXT_DIRECTIONS.map((value) => ({ value, label: DIRECTION_LABELS[value] }))}
+          />
+          <SelectField
+            label="Theme"
+            value={params.theme}
+            onChange={(value) => onParamsChange({ theme: value as Theme })}
+            options={THEMES.map((value) => ({ value, label: value[0]!.toUpperCase() + value.slice(1) }))}
           />
           <SelectField
             label="Language"

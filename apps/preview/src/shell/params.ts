@@ -13,6 +13,10 @@ export type TextDirection = (typeof TEXT_DIRECTIONS)[number];
 export const ASPECT_RATIOS = ['intrinsic', '16:9', '4:3', '1:1', '9:16', '21:9'] as const;
 export type AspectRatio = (typeof ASPECT_RATIOS)[number];
 
+/** Plate's themes, set as data-plate-theme on the page as a site would. */
+export const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
+export type Theme = (typeof THEMES)[number];
+
 export const PRELOAD_VALUES = ['auto', 'metadata', 'none'] as const;
 export type PreloadValue = (typeof PRELOAD_VALUES)[number];
 
@@ -27,6 +31,7 @@ export interface WorkbenchParams {
   scheme: ColorScheme;
   dir: TextDirection;
   locale: Locale;
+  theme: Theme;
   autoplay: boolean;
   muted: boolean;
   loop: boolean;
@@ -48,6 +53,7 @@ export function readParams(query: string): WorkbenchParams {
     scheme: oneOf(COLOR_SCHEMES, params.get('scheme'), 'auto'),
     dir: oneOf(TEXT_DIRECTIONS, params.get('dir'), 'auto'),
     locale: oneOf(locales, params.get('locale'), 'en'),
+    theme: oneOf(THEMES, params.get('theme'), 'night'),
     autoplay: flag('autoplay'),
     muted: flag('muted'),
     loop: flag('loop'),
@@ -64,6 +70,7 @@ export function writeParams(value: WorkbenchParams): string {
     scheme: value.scheme,
     dir: value.dir,
     locale: value.locale,
+    theme: value.theme,
     autoplay: flag(value.autoplay),
     muted: flag(value.muted),
     loop: flag(value.loop),
@@ -112,4 +119,6 @@ export function applyDocumentParams(value: WorkbenchParams): void {
   root.style.colorScheme = value.scheme === 'auto' ? '' : value.scheme;
   root.lang = value.locale;
   root.dir = value.dir === 'auto' ? localeDirection(value.locale) : value.dir;
+  if (value.theme === 'night') delete root.dataset.plateTheme;
+  else root.dataset.plateTheme = value.theme;
 }

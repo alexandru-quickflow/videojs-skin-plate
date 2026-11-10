@@ -100,7 +100,7 @@ npm install
 npm run dev
 ```
 
-The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar`.
+The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction, theme and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar&theme=blueprint`. It's live at [staging.plate-skin.pages.dev](https://staging.plate-skin.pages.dev/).
 
 `npm run typecheck` checks the types, and `npm run deploy` deploys the workbench to Vercel, Netlify or Cloudflare Pages.
 
