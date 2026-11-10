@@ -134,9 +134,10 @@
 </media-fullscreen-button>
 <button type="button" class="pl-btn pl-btn-more pl-only-narrow" commandfor="pl-more">
 <span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="more" class="pl-icon"></media-icon></span>
-<media-text class="pl-visually-hidden" token="pl.more">More</media-text>
+<media-text class="pl-visually-hidden pl-more-label" id="pl-more-label" token="pl.more">More</media-text>
 </button>
-<media-popover id="pl-more" side="top" align="end" class="pl-more">
+<media-popover id="pl-more" side="top" align="end" class="pl-more" aria-labelledby="pl-more-label">
+<pl-overflow class="pl-overflow">
 <media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
 <span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>
 </media-seek-button>
@@ -149,6 +150,7 @@
 <media-captions-button class="pl-btn pl-btn-cc">
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
 </media-captions-button>
+</pl-overflow>
 </media-popover>
 </div>
 </div>

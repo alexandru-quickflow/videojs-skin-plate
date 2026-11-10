@@ -530,16 +530,38 @@
         padding-bottom: 4px;
         scroll-snap-type: x proximity;
         scrollbar-width: none;
-        /* The last chip fades out at the edge, so the strip reads as one that scrolls. */
+      }
+
+      /* While more chips wait past the edge, the last visible one fades out, so the strip
+         reads as one that scrolls. At the end, nothing fades. */
+      .pl-chapter-list[data-more] {
         mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
       }
 
-      .pl-chapter-list:dir(rtl) {
+      .pl-chapter-list[data-more]:dir(rtl) {
         mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
       }
 
       .pl-chapter-list::-webkit-scrollbar {
         display: none;
+      }
+
+      /* A mouse has no swipe: give it a thin scrollbar. */
+      @media (pointer: fine) {
+        .pl-chapter-list {
+          scrollbar-width: thin;
+          scrollbar-color: var(--pl-line-strong) transparent;
+        }
+
+        .pl-chapter-list::-webkit-scrollbar {
+          display: block;
+          height: 4px;
+        }
+
+        .pl-chapter-list::-webkit-scrollbar-thumb {
+          border-radius: 4px;
+          background: var(--pl-line-strong);
+        }
       }
 
       .pl-chapter-list > li {
@@ -975,8 +997,11 @@
     }
 
     .pl-time-current {
-      margin: -4px -6px;
-      padding: 4px 6px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      margin: -6px -6px;
+      padding: 0 6px;
       color: var(--pl-paper);
       cursor: pointer;
       border-radius: 6px;
@@ -1248,9 +1273,9 @@
       white-space: nowrap;
     }
 
-    /* Under 520px the timecode and four icon keys share one row: play, mute, fullscreen and
+    /* Under 600px the timecode and four icon keys share one row: play, mute, fullscreen and
        More, which holds the seek, speed and captions keys. */
-    @container pl (width < 520px) {
+    @container pl (width < 600px) {
       /* One row when it fits; on the narrowest players the keys drop under the timecode
          as a whole, never one by one past the edge. */
       .pl-foot {
@@ -1315,6 +1340,22 @@
       }
     }
 
+    /* Between 600 and 640px the volume slider would be too short to use; the Mute key and
+       the Up and Down arrows still set the volume. */
+    @container pl (600px <= width < 640px) {
+      .pl-volume-slider {
+        display: none;
+      }
+    }
+
+    /* The More panel belongs to small players. If the player widens while it is open (a turn
+       of the phone, fullscreen), it goes, so no key shows twice. */
+    @container pl (width >= 600px) {
+      .pl-more {
+        display: none !important;
+      }
+    }
+
     /* The More panel: the keys that leave the row, as a small plate of their own. */
     .pl-more {
       flex-direction: column;
@@ -1330,6 +1371,10 @@
 
     .pl-more:is([data-open], :popover-open) {
       display: flex;
+    }
+
+    .pl-overflow {
+      display: contents;
     }
 
     .pl-more .pl-btn {

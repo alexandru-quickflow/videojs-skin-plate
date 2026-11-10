@@ -73,31 +73,39 @@ class ChaptersElement extends UIElement {
     buttons.forEach((button, i) => {
       const active = i === current;
       button.toggleAttribute('data-active', active);
-      if (active) button.setAttribute('aria-current', 'step');
+      if (active) button.setAttribute('aria-current', 'true');
       else button.removeAttribute('aria-current');
     });
 
     // In the horizontal strip on small players, keep the playing chapter in view.
+    // Measured on screen, so it holds in right-to-left too, and it never scrolls the page.
     const active = buttons[current];
     const list = this.#list;
     if (active && list && list.scrollWidth > list.clientWidth) {
-      const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const left = active.offsetLeft - list.offsetLeft;
-      const right = left + active.offsetWidth;
-      if (left < list.scrollLeft || right > list.scrollLeft + list.clientWidth) {
-        list.scrollTo({ left: Math.max(0, left - 16), behavior: smooth ? 'smooth' : 'auto' });
-      }
+      const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      const a = active.getBoundingClientRect();
+      const l = list.getBoundingClientRect();
+      if (a.left < l.left) list.scrollBy({ left: a.left - l.left - 16, behavior });
+      else if (a.right > l.right) list.scrollBy({ left: a.right - l.right + 16, behavior });
     }
   }
+
+  /** Marks the strip while chips wait past its end, for the fade. */
+  #markMore = (): void => {
+    const list = this.#list;
+    if (!list) return;
+    const end = list.scrollWidth - list.clientWidth;
+    list.toggleAttribute('data-more', end > 1 && Math.abs(list.scrollLeft) < end - 1);
+  };
 
   #render(cues: readonly Cue[]): void {
     const list = document.createElement('ol');
     list.className = 'pl-chapter-list';
     // Named by the visible "Index" label beside it.
+    // The nav carries the name; the list inside it only says how many chapters there are.
     const label = this.parentElement?.querySelector('.pl-index-label');
     if (label) {
       label.id ||= `pl-index-${Math.random().toString(36).slice(2, 8)}`;
-      list.setAttribute('aria-labelledby', label.id);
       this.closest('nav')?.setAttribute('aria-labelledby', label.id);
     }
 
@@ -122,9 +130,19 @@ class ChaptersElement extends UIElement {
       list.append(item);
     });
 
+    // A new set of cues replaces the list; keep the keyboard on the same chapter.
+    const focused = this.#list?.contains(document.activeElement)
+      ? [...this.#list.querySelectorAll('.pl-chapter')].indexOf(document.activeElement as Element)
+      : -1;
+
     this.#list?.remove();
     this.#list = list;
     this.append(list);
+
+    const signal = this.#disconnect?.signal;
+    list.addEventListener('scroll', this.#markMore, { passive: true, signal });
+    requestAnimationFrame(this.#markMore);
+    if (focused >= 0) list.querySelectorAll<HTMLButtonElement>('.pl-chapter')[Math.min(focused, cues.length - 1)]?.focus();
   }
 
   #onClick = (event: MouseEvent): void => {
@@ -180,5 +198,47 @@ class RulerMarksElement extends UIElement {
   }
 }
 
+/**
+ * Lives inside the More popover. Moves focus to the first key when the panel opens, and
+ * closes it when focus leaves for something outside the panel and its trigger.
+ */
+class OverflowElement extends HTMLElement {
+  #disconnect: AbortController | null = null;
+
+  connectedCallback(): void {
+    const popover = this.closest('media-popover') as (HTMLElement & { close?: () => void }) | null;
+    if (!popover) return;
+    this.#disconnect?.abort();
+    this.#disconnect = new AbortController();
+    const { signal } = this.#disconnect;
+
+    popover.addEventListener(
+      'open-change',
+      (event) => {
+        if (!(event as CustomEvent<{ open: boolean }>).detail?.open) return;
+        requestAnimationFrame(() => this.querySelector<HTMLElement>('.pl-btn:not([hidden])')?.focus());
+      },
+      { signal }
+    );
+
+    popover.addEventListener(
+      'focusout',
+      (event) => {
+        // Focus moving to nowhere (a click on empty page) also closes it.
+        const next = (event as FocusEvent).relatedTarget as Element | null;
+        if (next && (popover.contains(next) || next.closest?.(`[commandfor="${popover.id}"]`))) return;
+        popover.close?.();
+      },
+      { signal }
+    );
+  }
+
+  disconnectedCallback(): void {
+    this.#disconnect?.abort();
+    this.#disconnect = null;
+  }
+}
+
+if (!customElements.get('pl-overflow')) customElements.define('pl-overflow', OverflowElement);
 if (!customElements.get('pl-chapters')) customElements.define('pl-chapters', ChaptersElement);
 if (!customElements.get('pl-ruler-marks')) customElements.define('pl-ruler-marks', RulerMarksElement);

@@ -32,15 +32,23 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   const track = options.chapters
     ? `<track kind="chapters" label="Chapters" srclang="en" src="${attr(options.chapters)}" default>`
     : '';
-  // The More popover needs an id its trigger can name; make it unique per player.
-  const moreId = `pl-more-${Math.random().toString(36).slice(2, 8)}`;
-  player.innerHTML = template
-    .replace('commandfor="pl-more"', `commandfor="${moreId}"`)
-    .replace('id="pl-more"', `id="${moreId}"`).replace(
+  player.innerHTML = template.replace(
     MEDIA_PLACEHOLDER,
     // Without a src the media stays idle, so a page can mount first and set the source later.
     `<mux-video${options.src ? ` src="${attr(options.src)}"` : ''} playsinline crossorigin>${track}</mux-video>`
   );
+
+  // The More popover and its label need ids of their own on a page with several players.
+  const uid = Math.random().toString(36).slice(2, 8);
+  const popover = player.querySelector('.pl-more');
+  const trigger = player.querySelector('.pl-btn-more');
+  const label = player.querySelector('.pl-more-label');
+  if (popover && trigger && label) {
+    popover.id = `pl-more-${uid}`;
+    label.id = `pl-more-label-${uid}`;
+    trigger.setAttribute('commandfor', popover.id);
+    popover.setAttribute('aria-labelledby', label.id);
+  }
 
   // The i18n provider follows the page's lang, so the skin speaks the page's language.
   const i18n = document.createElement('media-i18n');
