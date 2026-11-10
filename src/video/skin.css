@@ -924,7 +924,7 @@
       min-width: 0;
     }
 
-    @container pl (width >= 640px) {
+    @container pl (width >= 800px) {
       .pl-foot {
         flex-wrap: nowrap;
       }
@@ -982,8 +982,11 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
-      gap: 2px 4px;
+      /* Three groups: playback, volume, display. Tight inside a group, a hairline between. */
+      gap: 2px;
       min-width: 0;
+      /* When the foot wraps, the keys move to a row of their own instead of folding in two. */
+      flex: 1 1 auto;
     }
 
     .pl-btn {
@@ -1118,8 +1121,13 @@
     .pl-sep {
       width: 1px;
       height: 18px;
-      margin-inline: 4px;
+      margin-inline: 12px;
       background: var(--pl-line-strong);
+    }
+
+    /* The solid key gets a little air before the seek keys. */
+    .pl-btn-play {
+      margin-inline-end: 6px;
     }
 
     /* Rate after the word, from the button's own state. */
@@ -1151,7 +1159,7 @@
     .pl-volume {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: 8px;
     }
 
     .pl-volume-slider {
@@ -1160,7 +1168,7 @@
       align-items: center;
       width: clamp(48px, 7cqi, 80px);
       height: 44px;
-      margin-inline-end: 6px;
+      margin-inline-end: 4px;
       cursor: pointer;
       touch-action: none;
       direction: ltr;
