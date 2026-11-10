@@ -32,7 +32,11 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   const track = options.chapters
     ? `<track kind="chapters" label="Chapters" srclang="en" src="${attr(options.chapters)}" default>`
     : '';
-  player.innerHTML = template.replace(
+  // The More popover needs an id its trigger can name; make it unique per player.
+  const moreId = `pl-more-${Math.random().toString(36).slice(2, 8)}`;
+  player.innerHTML = template
+    .replace('commandfor="pl-more"', `commandfor="${moreId}"`)
+    .replace('id="pl-more"', `id="${moreId}"`).replace(
     MEDIA_PLACEHOLDER,
     // Without a src the media stays idle, so a page can mount first and set the source later.
     `<mux-video${options.src ? ` src="${attr(options.src)}"` : ''} playsinline crossorigin>${track}</mux-video>`

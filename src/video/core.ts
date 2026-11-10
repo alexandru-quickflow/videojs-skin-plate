@@ -32,6 +32,7 @@ import '@videojs/html/ui/time';
 import '@videojs/html/ui/captions-button';
 import '@videojs/html/ui/playback-rate-button';
 import '@videojs/html/ui/fullscreen-button';
+import '@videojs/html/ui/popover';
 import '@videojs/html/ui/hotkey';
 import '@videojs/html/ui/gesture';
 import '@videojs/html/ui/status-announcer';
@@ -46,11 +47,22 @@ import { registerIcons } from '@videojs/html/icons';
 import playIcon from '@phosphor-icons/core/assets/fill/play-fill.svg?raw';
 import pauseIcon from '@phosphor-icons/core/assets/fill/pause-fill.svg?raw';
 import restartIcon from '@phosphor-icons/core/assets/bold/arrow-counter-clockwise-bold.svg?raw';
+import volumeIcon from '@phosphor-icons/core/assets/fill/speaker-high-fill.svg?raw';
+import mutedIcon from '@phosphor-icons/core/assets/fill/speaker-slash-fill.svg?raw';
+import expandIcon from '@phosphor-icons/core/assets/bold/corners-out-bold.svg?raw';
+import collapseIcon from '@phosphor-icons/core/assets/bold/corners-in-bold.svg?raw';
+import moreIcon from '@phosphor-icons/core/assets/bold/dots-three-bold.svg?raw';
 import './chapters';
 
-// The only icons in the skin: the play key's glyph. Everything else is a word.
+// The play key's glyph, and on small players the icons that stand in for the words of
+// mute, fullscreen and the More key. Everything else is a word.
 registerIcons('pl', {
   play: playIcon,
   pause: pauseIcon,
   restart: restartIcon,
+  volume: volumeIcon,
+  muted: mutedIcon,
+  expand: expandIcon,
+  collapse: collapseIcon,
+  more: moreIcon,
 });

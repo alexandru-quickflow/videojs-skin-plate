@@ -100,6 +100,10 @@
 <span class="pl-sep" aria-hidden="true"></span>
 <div class="pl-volume">
 <media-mute-button class="pl-btn pl-btn-mute">
+<span class="pl-btn-glyph pl-only-narrow" aria-hidden="true">
+<media-icon family="pl" name="volume" class="pl-icon pl-mute-on"></media-icon>
+<media-icon family="pl" name="muted" class="pl-icon pl-mute-off"></media-icon>
+</span>
 <span class="pl-btn-text" aria-hidden="true">
 <media-text class="pl-mute-on" token="buttons.mute">Mute</media-text>
 <media-text class="pl-mute-off" token="buttons.unmute">Unmute</media-text>
@@ -122,8 +126,30 @@
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
 </media-captions-button>
 <media-fullscreen-button class="pl-btn pl-btn-full">
+<span class="pl-btn-glyph pl-only-narrow" aria-hidden="true">
+<media-icon family="pl" name="expand" class="pl-icon pl-full-enter"></media-icon>
+<media-icon family="pl" name="collapse" class="pl-icon pl-full-exit"></media-icon>
+</span>
 <span class="pl-btn-text" aria-hidden="true"><media-text class="pl-full-enter" token="status.fullscreen">Fullscreen</media-text><media-text class="pl-full-exit" token="pl.exit">Exit</media-text></span>
 </media-fullscreen-button>
+<button type="button" class="pl-btn pl-btn-more pl-only-narrow" commandfor="pl-more">
+<span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="more" class="pl-icon"></media-icon></span>
+<media-text class="pl-visually-hidden" token="pl.more">More</media-text>
+</button>
+<media-popover id="pl-more" side="top" align="end" class="pl-more">
+<media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
+<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>
+</media-seek-button>
+<media-seek-button seconds="10" class="pl-btn pl-btn-seek">
+<span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">+10</bdi></span>
+</media-seek-button>
+<media-playback-rate-button class="pl-btn pl-btn-speed">
+<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.speed">Speed</media-text></span>
+</media-playback-rate-button>
+<media-captions-button class="pl-btn pl-btn-cc">
+<span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
+</media-captions-button>
+</media-popover>
 </div>
 </div>
 </div>

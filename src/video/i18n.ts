@@ -8,13 +8,13 @@ import '@videojs/html/i18n/locales/ru/register';
 import '@videojs/html/i18n/locales/ar/register';
 
 /** Strings for the skin's own labels. English is the text inside each <media-text>. */
-const strings: Record<string, { plate: string; status: string; index: string; exit: string }> = {
-  de: { plate: 'Tafel', status: 'Status', index: 'Index', exit: 'Beenden' },
-  fr: { plate: 'Planche', status: 'État', index: 'Index', exit: 'Quitter' },
-  es: { plate: 'Lámina', status: 'Estado', index: 'Índice', exit: 'Salir' },
-  ro: { plate: 'Planșa', status: 'Stare', index: 'Index', exit: 'Ieși' },
-  ru: { plate: 'Лист', status: 'Статус', index: 'Указатель', exit: 'Выйти' },
-  ar: { plate: 'لوحة', status: 'الحالة', index: 'الفهرس', exit: 'خروج' },
+const strings: Record<string, { plate: string; status: string; index: string; exit: string; more: string }> = {
+  de: { plate: 'Tafel', status: 'Status', index: 'Index', exit: 'Beenden', more: 'Mehr' },
+  fr: { plate: 'Planche', status: 'État', index: 'Index', exit: 'Quitter', more: 'Plus' },
+  es: { plate: 'Lámina', status: 'Estado', index: 'Índice', exit: 'Salir', more: 'Más' },
+  ro: { plate: 'Planșa', status: 'Stare', index: 'Index', exit: 'Ieși', more: 'Mai mult' },
+  ru: { plate: 'Лист', status: 'Статус', index: 'Указатель', exit: 'Выйти', more: 'Ещё' },
+  ar: { plate: 'لوحة', status: 'الحالة', index: 'الفهرس', exit: 'خروج', more: 'المزيد' },
 };
 
 // The `pl` namespace is the skin's own; Video.js types only know its built-in keys.

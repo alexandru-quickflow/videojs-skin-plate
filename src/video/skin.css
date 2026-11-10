@@ -1233,25 +1233,109 @@
       outline-offset: 3px;
     }
 
+    /* ------------------------------------------------------------------ Small players */
+
+    .pl-only-narrow {
+      display: none;
+    }
+
+    .pl-visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    /* Under 520px the timecode and four icon keys share one row: play, mute, fullscreen and
+       More, which holds the seek, speed and captions keys. */
     @container pl (width < 520px) {
       .pl-foot {
-        flex-direction: column;
-        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 12px;
       }
 
       .pl-controls {
-        justify-content: space-between;
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+        gap: 2px;
       }
 
-      .pl-volume-slider,
-      .pl-sep {
+      .pl-controls > :is(.pl-btn-seek, .pl-btn-speed, .pl-btn-cc, .pl-sep),
+      .pl-volume-slider {
         display: none;
       }
 
-      .pl-btn {
-        padding-inline: 8px;
-        letter-spacing: 0.08em;
+      .pl-only-narrow {
+        display: grid;
       }
+
+      .pl-btn-play .pl-btn-text,
+      .pl-btn-mute .pl-btn-text,
+      .pl-btn-full .pl-btn-text {
+        display: none;
+      }
+
+      .pl-btn-play {
+        padding-inline: 0;
+        margin-inline-end: 4px;
+      }
+
+      .pl-btn-mute,
+      .pl-btn-full,
+      .pl-btn-more {
+        padding-inline: 0;
+        color: var(--pl-paper);
+      }
+
+      .pl-btn-mute .pl-btn-glyph,
+      .pl-btn-full .pl-btn-glyph,
+      .pl-btn-more .pl-btn-glyph {
+        width: 18px;
+        height: 18px;
+      }
+
+      .pl-btn-mute .pl-mute-off,
+      .pl-btn-mute[data-muted] .pl-mute-on {
+        visibility: hidden;
+      }
+
+      .pl-btn-full .pl-btn-glyph .pl-full-exit,
+      .pl-btn-full[data-fullscreen] .pl-btn-glyph .pl-full-enter {
+        display: block;
+        visibility: hidden;
+      }
+
+      .pl-btn-full[data-fullscreen] .pl-btn-glyph .pl-full-exit {
+        visibility: visible;
+      }
+    }
+
+    /* The More panel: the keys that leave the row, as a small plate of their own. */
+    .pl-more {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2px;
+      min-width: 160px;
+      padding: 6px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: var(--pl-radius-sm);
+      background: var(--pl-surface);
+      box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+    }
+
+    .pl-more:is([data-open], :popover-open) {
+      display: flex;
+    }
+
+    .pl-more .pl-btn {
+      justify-content: flex-start;
+      padding-inline: 12px;
+    }
+
+    .pl-more .pl-btn-text {
+      justify-items: start;
     }
 
     /* ------------------------------------------------------------------ Error dialog */
