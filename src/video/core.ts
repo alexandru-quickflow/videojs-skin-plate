@@ -72,6 +72,7 @@ import pipIcon from '@phosphor-icons/core/assets/bold/picture-in-picture-bold.sv
 import airplayIcon from '@phosphor-icons/core/assets/bold/airplay-bold.svg?raw';
 import castIcon from '@phosphor-icons/core/assets/bold/screencast-bold.svg?raw';
 import ccIcon from '@phosphor-icons/core/assets/bold/closed-captioning-bold.svg?raw';
+import qualityIcon from '@phosphor-icons/core/assets/bold/sliders-horizontal-bold.svg?raw';
 import './chapters';
 
 // The play key's glyph, and on small players the icons that stand in for the words of
@@ -90,4 +91,5 @@ registerIcons('pl', {
   airplay: airplayIcon,
   cast: castIcon,
   cc: ccIcon,
+  quality: qualityIcon,
 });

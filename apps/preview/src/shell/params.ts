@@ -305,8 +305,8 @@ export function applySkinParams(container: HTMLElement, value: WorkbenchParams):
   else container.dataset.head = 'none';
 }
 
-/** A CSS string for `content`. */
-export const cssString = (value: string) => `"${value.replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ')}"`;
+export { cssString } from '@/css-string';
+import { cssString } from '@/css-string';
 
 /** Text on the accent: whichever of Plate's two inks reads better on it (WCAG contrast). */
 export function onAccent(hexColor: string): string {
@@ -325,8 +325,8 @@ export function onAccent(hexColor: string): string {
 export function codeSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
   const lines: string[] = [
-    `  src: '${(custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8'}',`,
-    `  chapters: '${(custom && value.customChapters) || '/chapters.vtt'}',`,
+    `  src: ${JSON.stringify((custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8')},`,
+    `  chapters: ${JSON.stringify((custom && value.customChapters) || '/chapters.vtt')},`,
   ];
   if (value.theme !== 'night') lines.push(`  theme: '${value.theme}',`);
   if (value.index !== 'end') lines.push(`  index: '${value.index}',`);
@@ -334,7 +334,7 @@ export function codeSnippet(value: WorkbenchParams): string {
   if (!value.head) lines.push('  head: false,');
   if (value.number) lines.push(`  number: ${JSON.stringify(value.number)},`);
   lines.push(...wordsOption(value, '  '), ...styleOption(value, '  '));
-  return `const { mountPlate } = await import('/plate/plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
+  return `const { mountPlate } = await import('${EMBED_BASE}plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
 }
 
 /** Where the deployed workbench serves the embed build (see apps/preview/stage-embed.mjs). */
@@ -344,9 +344,9 @@ export const EMBED_BASE = 'https://staging.plate-skin.pages.dev/embed/';
 export function embedSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
   const options = [
-    `    src: '${(custom && value.customSrc) || 'YOUR_VIDEO_LINK'}',`,
-    `    chapters: '${(custom && value.customChapters) || 'YOUR_CHAPTERS_LINK'}',`,
-    `    title: 'My video',`,
+    `    src: ${JSON.stringify((custom && value.customSrc) || 'YOUR_VIDEO_LINK')},`,
+    `    chapters: ${JSON.stringify((custom && value.customChapters) || 'YOUR_CHAPTERS_LINK')},`,
+    `    title: "My video",`,
   ];
   if (value.theme !== 'night') options.push(`    theme: '${value.theme}',`);
   if (value.index !== 'end') options.push(`    index: '${value.index}',`);

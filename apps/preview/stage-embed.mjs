@@ -12,4 +12,7 @@ await writeFile(
   root('dist/_headers'),
   ['/embed/*', '  Access-Control-Allow-Origin: *', '  Cache-Control: public, max-age=3600', ''].join('\n')
 );
-console.log('Staged dist-embed in dist/embed with CORS headers.');
+// Without a 404 page, Pages answers any missing path with the workbench (200, text/html), which turns a
+// missing chunk into a confusing MIME error. A real 404 says what happened.
+await writeFile(root('dist/404.html'), '<!doctype html><meta charset="utf-8"><title>Not found</title><p>Not found.</p>\n');
+console.log('Staged dist-embed in dist/embed with CORS headers and a 404 page.');

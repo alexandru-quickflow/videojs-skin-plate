@@ -15,9 +15,6 @@ interface Cue {
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
-/** The width below which the skin switches to icon keys and the More panel (skin.css). */
-const SMALL_PLAYER = 600;
-
 function activeIndex(cues: readonly Cue[], time: number): number {
   for (let i = cues.length - 1; i >= 0; i--) {
     if (time >= cues[i]!.startTime - 0.05) return i;
@@ -98,6 +95,28 @@ class ChaptersElement extends UIElement {
     }
   }
 
+  /**
+   * In the index column, frames for every chapter may not fit beside the picture. Then only the playing
+   * chapter keeps its frame (data-tight on the index), so no chapter is cut off out of sight.
+   */
+  #fit = (): void => {
+    const index = this.closest<HTMLElement>('.pl-index');
+    const list = this.#list;
+    if (!index || !list) return;
+    if (getComputedStyle(list).display === 'flex') {
+      delete index.dataset.tight;
+      return;
+    }
+    const thumbs = [...list.querySelectorAll<HTMLElement>('.pl-chapter-thumb')];
+    const shown = thumbs.find((t) => t.offsetHeight > 0);
+    // Each frame takes its own height plus the margin above it.
+    const block = shown ? shown.offsetHeight + parseFloat(getComputedStyle(shown).marginTop) : 60;
+    const hidden = thumbs.filter((t) => t.offsetHeight === 0).length;
+    const full = index.scrollHeight + (index.dataset.tight !== undefined ? hidden * block : 0);
+    if (full > index.clientHeight + 1) index.dataset.tight = '';
+    else delete index.dataset.tight;
+  };
+
   /** Marks the strip while chips wait past its end, for the fade. */
   #markMore = (): void => {
     const list = this.#list;
@@ -133,7 +152,11 @@ class ChaptersElement extends UIElement {
       title.className = 'pl-chapter-title';
       // A Latin name on an Arabic page keeps its own direction.
       title.dir = 'auto';
-      title.textContent = cue.text;
+      // A domain breaks after its dots, never inside a word.
+      cue.text.split(/(?<=\.)/).forEach((part, n, parts) => {
+        title.append(part);
+        if (n < parts.length - 1) title.append(document.createElement('wbr'));
+      });
 
       // The chapter's frame from the storyboard, well in so it is past any title card.
       const next = cues[i + 1]?.startTime ?? cue.startTime + 14;
@@ -161,9 +184,15 @@ class ChaptersElement extends UIElement {
     list.addEventListener('scroll', this.#markMore, { passive: true, signal });
     // Size changes (fullscreen, a turned phone, fonts arriving) move the end too.
     this.#resize?.disconnect();
-    this.#resize = new ResizeObserver(this.#markMore);
+    this.#resize = new ResizeObserver(() => {
+      this.#markMore();
+      this.#fit();
+    });
     this.#resize.observe(list);
+    const index = this.closest<HTMLElement>('.pl-index');
+    if (index) this.#resize.observe(index);
     this.#markMore();
+    this.#fit();
     if (focused >= 0) list.querySelectorAll<HTMLButtonElement>('.pl-chapter')[Math.min(focused, cues.length - 1)]?.focus();
   }
 
@@ -229,20 +258,35 @@ class OverflowElement extends HTMLElement {
   #resize: ResizeObserver | null = null;
 
   connectedCallback(): void {
-    const uid = Math.random().toString(36).slice(2, 8);
+    this.#link();
+    // Defined before its children are parsed, the element links them a moment later.
+    queueMicrotask(() => this.#link());
+    this.#watch();
+  }
+
+  #uid = Math.random().toString(36).slice(2, 8);
+
+  #link(): void {
+    const uid = this.#uid;
     for (const item of this.querySelectorAll<HTMLElement>('[data-page]')) {
       const page = this.querySelector<HTMLElement>(`[data-page-for="${item.dataset.page}"]`);
       if (!page) continue;
       page.id ||= `pl-more-${item.dataset.page}-${uid}`;
       item.setAttribute('commandfor', page.id);
     }
+  }
+
+  #watch(): void {
+    this.#resize?.disconnect();
 
     const menu = this.querySelector('media-menu') as (HTMLElement & { open?: boolean }) | null;
+    const key = this.querySelector<HTMLElement>('.pl-btn-more');
     const player = this.closest('.pl');
-    if (!menu || !player) return;
-    this.#resize = new ResizeObserver(([entry]) => {
-      if (!menu.open || (entry?.contentRect.width ?? 0) < SMALL_PLAYER) return;
-      // The More key hides at this width too, so focus goes to the play key.
+    if (!menu || !key || !player) return;
+    // When the player resizes past the widths where More shows (a turned phone, fullscreen), its key
+    // hides: close the menu, and keep the keyboard on the play key.
+    this.#resize = new ResizeObserver(() => {
+      if (!menu.open || getComputedStyle(key).display !== 'none') return;
       if (this.contains(document.activeElement)) {
         player.querySelector<HTMLElement>('.pl-controls > .pl-btn-play')?.focus();
       }

@@ -10,6 +10,8 @@ export interface ContrastRow {
 }
 
 export interface A11yReport {
+  /** The width the player actually has, which a narrow window can make smaller than the one asked for. */
+  width: number;
   controls: { name: string; role: string }[];
   contrast: ContrastRow[];
 }
@@ -101,26 +103,47 @@ export function measure(): A11yReport | null {
     .map((el) => ({ name: accessibleName(el), role: el.getAttribute('role') ?? el.localName }))
     .filter((row, i, all) => all.findIndex((other) => other.name === row.name && other.role === row.role) === i);
 
-  return { controls, contrast };
+  return { width: Math.round(skin.getBoundingClientRect().width), controls, contrast };
 }
 
 /** Send a fresh report to the workbench now and whenever the player may have changed. */
 export function startReporting(): void {
-  // At most one measurement every half second: playback changes attributes many times a second.
+  // At most one measurement every half second, and a message only when something changed.
   let pending = false;
+  let last = '';
   const send = () => {
     if (pending) return;
     pending = true;
     window.setTimeout(() => {
       pending = false;
       const report = measure();
-      if (report) window.parent.postMessage({ type: A11Y_MESSAGE, report }, location.origin);
+      const key = JSON.stringify(report);
+      if (!report || key === last) return;
+      last = key;
+      window.parent.postMessage({ type: A11Y_MESSAGE, report }, location.origin);
     }, 500);
   };
   send();
+  // Theme, properties and language live on the page; names and availability inside the player. Style
+  // attributes inside the player are left out: the sliders rewrite them many times a second.
   new MutationObserver(send).observe(document.documentElement, {
-    subtree: true,
     attributes: true,
-    attributeFilter: ['aria-label', 'hidden', 'data-plate-theme', 'style', 'lang', 'data-availability'],
+    attributeFilter: ['data-plate-theme', 'style', 'lang', 'dir'],
   });
+  const watchPlayer = () => {
+    const skin = document.querySelector('.media-skin.pl');
+    if (!skin) return false;
+    new MutationObserver(send).observe(skin, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['aria-label', 'hidden', 'data-availability', 'data-hidden'],
+    });
+    return true;
+  };
+  // The player is mounted again when the source changes.
+  new MutationObserver(() => {
+    if (watchPlayer()) send();
+  }).observe(document.querySelector('media-i18n') ?? document.body, { childList: true });
+  watchPlayer();
 }

@@ -143,6 +143,11 @@ export function OptionsPanel({ id, params, onParamsChange, preferences, report }
       <SidebarContent className="gap-0">
         <Section title="Preview">
           <WidthControl value={params.width} onChange={(width) => onParamsChange({ width })} />
+          {report && report.width < params.width - 2 && (
+            <p className="text-muted-foreground col-span-2 text-xs" role="status">
+              The player has {report.width}px here. Close Options or open the preview in a new tab for {params.width}px.
+            </p>
+          )}
           <SelectField
             label="Aspect ratio"
             value={params.ratio}
@@ -442,7 +447,14 @@ function ColorField({
           onChange={(event) => onChange(event.target.value)}
           className="h-8 w-10 cursor-pointer rounded border bg-transparent p-0.5"
         />
-        <Button type="button" size="sm" variant="ghost" disabled={!value} onClick={() => onChange('')}>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          disabled={!value}
+          aria-label={value ? `Reset ${label} to the theme's` : `${label}: the theme's own`}
+          onClick={() => onChange('')}
+        >
           {value ? 'Reset' : 'Theme'}
         </Button>
       </div>

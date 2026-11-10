@@ -20,7 +20,7 @@
 <div aria-hidden="true" class="pl-indicators">
 <media-volume-indicator class="pl-indicator pl-volume-indicator">
 <media-volume-indicator-fill class="pl-volume-indicator-fill">
-<span class="pl-indicator-label">Vol</span>
+<media-text class="pl-indicator-label" token="pl.vol">Vol</media-text>
 <media-volume-indicator-value class="pl-indicator-value">
 </media-volume-indicator-value>
 </media-volume-indicator-fill>
@@ -130,6 +130,7 @@
 <!-- Quality: the stream's renditions, from Video.js. The menu binds to the key right before it,
      and hides the key when the stream has one rendition or none. -->
 <button type="button" class="pl-btn pl-btn-quality">
+<span class="pl-btn-glyph pl-quality-glyph" aria-hidden="true"><media-icon family="pl" name="quality" class="pl-icon"></media-icon></span>
 <span class="pl-btn-text"><span><media-text token="menu.quality">Quality</media-text> <span class="pl-quality-value" data-part="value"></span></span></span>
 </button>
 <media-menu side="top" align="end" class="pl-menu pl-quality-menu">
@@ -284,7 +285,7 @@
 <media-dialog-backdrop class="pl-dialog-backdrop">
 </media-dialog-backdrop>
 <media-dialog-popup class="pl-dialog">
-<span class="pl-label pl-dialog-code" aria-hidden="true">Error</span>
+<media-text class="pl-label pl-dialog-code" token="pl.error" aria-hidden="true">Error</media-text>
 <media-dialog-title class="pl-dialog-title">
 </media-dialog-title>
 <media-text class="pl-dialog-hint" token="pl.errorHint">The video didn't load. Check your connection and try again.</media-text>

@@ -6,6 +6,7 @@ import '@videojs/html/i18n';
 import './video/core';
 import './embed.css';
 import template from './video/skin.html?raw';
+import { cssString } from './css-string';
 
 export interface PlateOptions {
   /** A Mux stream URL (https://stream.mux.com/<playback-id>.m3u8) or any HLS/MP4 URL. */
@@ -36,14 +37,6 @@ const MEDIA_PLACEHOLDER = '<!-- Add a compatible media component here. -->';
 
 const attr = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-
-/** A CSS string for `content`: quotes, backslashes and line breaks escaped, control characters dropped. */
-const cssString = (value: string): string =>
-  `"${value
-    .replace(/[\\"]/g, '\\$&')
-    .replace(/\r\n?|\n/g, '\\a ')
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001f\u007f]/g, '')}"`;
 
 const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 const INDEXES = ['end', 'start', 'none'] as const;

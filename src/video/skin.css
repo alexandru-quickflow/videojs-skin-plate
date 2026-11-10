@@ -325,6 +325,7 @@
       --pl-w-ended: "Ended";
       --pl-w-error: "Error";
       --pl-w-detail: "Detail";
+      --pl-w-vol: "VOL";
     }
 
     :scope:lang(de) {
@@ -335,6 +336,7 @@
       --pl-w-ended: "Ende";
       --pl-w-error: "Fehler";
       --pl-w-detail: "Detail";
+      --pl-w-vol: "LAUTST.";
     }
 
     :scope:lang(fr) {
@@ -345,6 +347,7 @@
       --pl-w-ended: "Terminé";
       --pl-w-error: "Erreur";
       --pl-w-detail: "Détail";
+      --pl-w-vol: "VOL";
     }
 
     :scope:lang(es) {
@@ -355,6 +358,7 @@
       --pl-w-ended: "Fin";
       --pl-w-error: "Error";
       --pl-w-detail: "Detalle";
+      --pl-w-vol: "VOL";
     }
 
     :scope:lang(ro) {
@@ -365,6 +369,7 @@
       --pl-w-ended: "Gata";
       --pl-w-error: "Eroare";
       --pl-w-detail: "Detaliu";
+      --pl-w-vol: "VOL";
     }
 
     :scope:lang(ru) {
@@ -375,6 +380,7 @@
       --pl-w-ended: "Конец";
       --pl-w-error: "Ошибка";
       --pl-w-detail: "Деталь";
+      --pl-w-vol: "ГРОМК.";
     }
 
     :scope:lang(ar) {
@@ -385,6 +391,7 @@
       --pl-w-ended: "انتهى";
       --pl-w-error: "خطأ";
       --pl-w-detail: "تفصيل";
+      --pl-w-vol: "الصوت";
     }
 
     :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::after {
@@ -775,7 +782,7 @@
       font-size: clamp(17px, 2.1cqi, 22px);
       line-height: 1.2;
       letter-spacing: -0.005em;
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
     }
 
     @container pl (width < 760px) {
@@ -827,7 +834,8 @@
       box-shadow: 0 0 0 1px var(--pl-teal);
     }
 
-    .pl-chapter-list:has(> li:nth-child(6)) .pl-chapter-thumb {
+    .pl-chapter-list:has(> li:nth-child(6)) .pl-chapter-thumb,
+    .pl-index[data-tight] .pl-chapter:not([data-active]) .pl-chapter-thumb {
       display: none;
     }
 
@@ -1222,7 +1230,7 @@
       min-width: 0;
     }
 
-    @container pl (width >= 880px) {
+    @container pl (width >= 1000px) {
       .pl-foot {
         flex-wrap: nowrap;
       }
@@ -1449,15 +1457,17 @@
       }
     }
 
-    /* Below the widest players the row is full: Mute and Captions become their glyphs, as on
-       phones. Captions keeps its word for screen readers; Mute is named by Video.js. */
-    .pl-captions-glyph {
+    /* Below the widest players the row is full: Mute, Quality and Captions become their glyphs, as
+       on phones. Quality and Captions keep their words for screen readers; Mute is named by Video.js. */
+    .pl-captions-glyph,
+    .pl-quality-glyph {
       display: none;
     }
 
     @container pl (600px <= width < 1360px) {
       .pl-btn-mute .pl-only-narrow,
-      .pl-captions-glyph {
+      .pl-captions-glyph,
+      .pl-quality-glyph {
         display: grid;
         width: 18px;
         height: 18px;
@@ -1476,7 +1486,8 @@
         visibility: visible;
       }
 
-      .pl-btn-captions .pl-btn-text {
+      .pl-btn-captions .pl-btn-text,
+      .pl-btn-quality .pl-btn-text {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -1486,14 +1497,22 @@
       }
 
       .pl-btn-mute,
-      .pl-btn-captions {
+      .pl-btn-captions,
+      .pl-btn-quality {
         padding-inline: 0;
         color: var(--pl-paper);
       }
     }
 
-    /* Narrower still, Speed shows only its rate; the word stays in its name. */
-    @container pl (600px <= width < 960px) {
+    /* Just above phones, a long Play word (Воспроизвести) leaves no room for More: Play is its glyph. */
+    @container pl (600px <= width < 680px) {
+      .pl-controls > .pl-btn-play .pl-btn-text {
+        display: none;
+      }
+    }
+
+    /* Below 1120px Speed shows only its rate; the word stays in its name. */
+    @container pl (600px <= width < 1120px) {
       .pl-controls > .pl-btn-rate .pl-btn-text media-text {
         position: absolute;
         width: 1px;
@@ -1620,7 +1639,7 @@
     }
 
     .pl-volume-readout::before {
-      content: "VOL";
+      content: var(--pl-w-vol, "VOL");
       letter-spacing: 0.16em;
       color: var(--pl-faint);
     }
@@ -1645,7 +1664,7 @@
     }
 
     /* Under 600px the timecode and four icon keys share one row: play, mute, fullscreen and
-       More, a menu with a page each for speed, quality and captions. */
+       More, a menu with a page each for speed, quality, captions and audio. */
     @container pl (width < 600px) {
       /* One row when it fits; on the narrowest players the keys drop under the timecode
          as a whole, never one by one past the edge. */
@@ -1661,7 +1680,7 @@
         margin-inline-start: auto;
       }
 
-      .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-captions, .pl-btn-audio, .pl-btn-airplay, .pl-btn-cast, .pl-sep),
+      .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-captions, .pl-btn-audio, .pl-sep),
       .pl-rate-menu:not(.pl-rate-menu-more),
       .pl-btn-captions-menu,
       .pl-btn-audio-menu,
@@ -1714,17 +1733,51 @@
       }
     }
 
-    /* Between 600 and 700px the volume slider would be too short to use; the Mute key and
+    /* Between 600 and 760px the volume slider would be too short to use; the Mute key and
        the Up and Down arrows still set the volume. */
-    @container pl (600px <= width < 700px) {
+    @container pl (600px <= width < 760px) {
       .pl-volume-slider {
         display: none;
       }
     }
 
-    /* The More panel belongs to small players. If the player widens while it is open (a turn
-       of the phone, fullscreen), it goes, so no key shows twice. */
+    /* More beyond phones: it keeps what the row has no room for, Quality below 1120px and Audio
+       below 1360px, and shows only when one of those is there to choose. Speed and Captions are on
+       the row from 600px, so their pages leave. From 1360px everything is on the row. */
+    @container pl (600px <= width < 1120px) {
+      .pl-overflow:has(.pl-menu-page[data-page="quality"]:not([hidden])) .pl-btn-more,
+      .pl-overflow:has([data-page-for="audio"] media-menu-radio-item + media-menu-radio-item) .pl-btn-more {
+        display: grid;
+      }
+    }
+
+    @container pl (1120px <= width < 1360px) {
+      .pl-overflow:has([data-page-for="audio"] media-menu-radio-item + media-menu-radio-item) .pl-btn-more {
+        display: grid;
+      }
+
+      .pl-more .pl-menu-page[data-page="quality"] {
+        display: none;
+      }
+    }
+
     @container pl (width >= 600px) {
+      .pl-more .pl-menu-page:is([data-page="speed"], [data-page="captions"]) {
+        display: none;
+      }
+
+      .pl-btn-more {
+        padding-inline: 0;
+        color: var(--pl-paper);
+      }
+
+      .pl-btn-more .pl-btn-glyph {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @container pl (width >= 1360px) {
       .pl-more {
         display: none !important;
       }
@@ -1851,7 +1904,14 @@
 
     /* The menu: a small plate like More, one row per rendition. */
     .pl-menu {
+      /* As wide as its longest label, up to a limit; a long track name ends in an ellipsis. */
+      width: max-content;
       min-width: 168px;
+      max-width: min(320px, calc(100vw - 24px));
+      /* A long page (eight rates) scrolls instead of climbing past the player on a phone. */
+      max-height: min(70svh, 340px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 6px;
       border: 1px solid var(--pl-line-strong);
       border-radius: var(--pl-radius-sm);
@@ -1868,6 +1928,7 @@
     }
 
     .pl-menu-item {
+      text-align: start;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -1891,6 +1952,13 @@
       width: 2px;
       height: 14px;
       background: var(--pl-line-strong);
+    }
+
+    .pl-menu-item [data-part="label"] {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .pl-menu-item[aria-checked="true"] {
@@ -1944,9 +2012,10 @@
       color: var(--pl-teal);
     }
 
-    /* Phones play picture-in-picture from their own controls; the row keeps four keys. */
+    /* Phones play picture-in-picture from their own controls; the row keeps its four keys, plus
+       AirPlay or Cast when a device is there to receive. */
     @container pl (width < 600px) {
-      .pl-controls > :is(.pl-btn-pip, .pl-btn-glyph-key) {
+      .pl-controls > .pl-btn-pip {
         display: none;
       }
     }
@@ -2143,6 +2212,10 @@
 
     /* Arabic is joined script: letter-spacing breaks the joins, so the spaced capitals of the
        mono labels go plain. */
+    :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn-text, .pl-indicator, .pl-tooltip, .pl-menu-item, .pl-volume-readout) {
+      font-family: system-ui, "Noto Sans Arabic", "Segoe UI", sans-serif;
+    }
+
     :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn, .pl-indicator, .pl-chapter-num) {
       letter-spacing: 0;
     }
@@ -2244,8 +2317,37 @@
       .pl-plate,
       .pl-btn,
       .pl-chapter,
-      .pl-dialog {
+      .pl-dialog,
+      .pl-menu,
+      .pl-tooltip,
+      .pl-volume-readout,
+      .pl-time-slider-preview {
         border: 1px solid CanvasText;
+      }
+
+      /* The tick that marks a menu's choice, and the scales' ticks, keep their shapes in system colours. */
+      .pl-menu-item::before,
+      .pl-volume-scale,
+      .pl-time-slider::before {
+        forced-color-adjust: none;
+      }
+
+      .pl-menu-item::before {
+        background: GrayText;
+      }
+
+      .pl-menu-item[aria-checked="true"]::before {
+        background: Highlight;
+      }
+
+      .pl-menu-item[data-highlighted] {
+        outline: 1px solid Highlight;
+        outline-offset: -1px;
+      }
+
+      :scope {
+        --pl-line: GrayText;
+        --pl-line-strong: GrayText;
       }
 
       .pl-plate::after {
