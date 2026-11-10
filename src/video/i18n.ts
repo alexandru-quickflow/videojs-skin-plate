@@ -30,10 +30,13 @@ registerI18n('de', {
 
 // The speed button's name starts with the word it shows (WCAG 2.5.3, label in name).
 const speedNames: Record<string, string> = {
-  en: 'Speed, {rate}',
-  de: 'Tempo, {rate}',
-  ro: 'Viteză, {rate}',
-  ar: 'السرعة، {rate}',
+  en: 'Speed, {rate}×',
+  de: 'Tempo, {rate}×',
+  fr: 'Vitesse, {rate}×',
+  es: 'Velocidad, {rate}×',
+  ro: 'Viteză, {rate}×',
+  ru: 'Скорость, {rate}×',
+  ar: 'السرعة، {rate}×',
 };
 for (const [locale, rate] of Object.entries(speedNames)) {
   registerI18n(locale, { playback: { rate } } as Parameters<typeof registerI18n>[1]);

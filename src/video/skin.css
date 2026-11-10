@@ -23,7 +23,8 @@
     --pl-line-soft: rgb(224 240 238 / 0.06);
     /* Slider tracks: at least 3:1 against the surface (WCAG 1.4.11). */
     --pl-track: rgb(224 240 238 / 0.4);
-    --pl-track-buffer: rgb(224 240 238 / 0.62);
+    /* Brighter than the track, quieter than the red played bar. */
+    --pl-track-buffer: rgb(224 240 238 / 0.5);
 
     /* Two saturated colours: teal is where you are, hot is the moving playhead. */
     --pl-teal: var(--media-accent-color, #2bd4bd);
@@ -546,11 +547,25 @@
         display: none;
       }
 
-      /* A mouse has no swipe: give it a thin scrollbar. */
+      /* A mouse has no swipe: give it a thin scrollbar. Chromium and Safari draw it from the
+         ::-webkit-scrollbar rules (setting scrollbar-width there would switch them off and bring
+         back the arrow buttons); Firefox from scrollbar-width. */
       @media (pointer: fine) {
-        .pl-chapter-list {
-          scrollbar-width: thin;
-          scrollbar-color: var(--pl-line-strong) transparent;
+        @supports not selector(::-webkit-scrollbar) {
+          .pl-chapter-list {
+            scrollbar-width: thin;
+            scrollbar-color: var(--pl-line-strong) transparent;
+          }
+        }
+
+        @supports selector(::-webkit-scrollbar) {
+          .pl-chapter-list {
+            scrollbar-width: auto;
+          }
+        }
+
+        .pl-chapter-list::-webkit-scrollbar-button {
+          display: none;
         }
 
         .pl-chapter-list::-webkit-scrollbar {
@@ -1470,6 +1485,34 @@
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
       min-height: 0;
+    }
+
+    /* Stacked (narrow) fullscreen: the picture takes the spare height, the chip strip only
+       what it needs. */
+    @container pl (width < 760px) {
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
+        grid-template-rows: minmax(0, 1fr) auto;
+      }
+    }
+
+    /* A phone on its side: little height, so the head and the index step aside for the
+       picture. The ruler and the keys stay. */
+    @media (max-height: 500px) {
+      :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-head, .pl-index) {
+        display: none;
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
+        grid-template-rows: minmax(0, 1fr) auto auto;
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-ruler {
+        padding-top: 8px;
+      }
     }
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before {

@@ -132,11 +132,12 @@
 </span>
 <span class="pl-btn-text" aria-hidden="true"><media-text class="pl-full-enter" token="status.fullscreen">Fullscreen</media-text><media-text class="pl-full-exit" token="pl.exit">Exit</media-text></span>
 </media-fullscreen-button>
-<button type="button" class="pl-btn pl-btn-more pl-only-narrow" commandfor="pl-more">
+<button type="button" class="pl-btn pl-btn-more pl-only-narrow">
 <span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="more" class="pl-icon"></media-icon></span>
-<media-text class="pl-visually-hidden pl-more-label" id="pl-more-label" token="pl.more">More</media-text>
+<media-text class="pl-visually-hidden pl-more-label" token="pl.more">More</media-text>
 </button>
-<media-popover id="pl-more" side="top" align="end" class="pl-more" aria-labelledby="pl-more-label">
+<!-- Video.js binds the popover to the key right before it and gives both ids. -->
+<media-popover side="top" align="end" class="pl-more">
 <pl-overflow class="pl-overflow">
 <media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
 <span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>

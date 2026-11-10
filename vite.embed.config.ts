@@ -14,6 +14,11 @@ export default defineConfig({
     outDir: path('./dist-embed'),
     emptyOutDir: true,
     cssCodeSplit: false,
+    // Library mode leaves an ES build unminified; this is shipped to browsers, so minify it.
+    minify: true,
+    rolldownOptions: {
+      output: { minify: true },
+    },
     lib: {
       entry: path('./src/embed.ts'),
       formats: ['es'],

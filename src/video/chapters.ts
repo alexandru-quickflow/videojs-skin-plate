@@ -15,6 +15,9 @@ interface Cue {
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
+/** The width below which the skin switches to icon keys and the More panel (skin.css). */
+const SMALL_PLAYER = 600;
+
 function activeIndex(cues: readonly Cue[], time: number): number {
   for (let i = cues.length - 1; i >= 0; i--) {
     if (time >= cues[i]!.startTime - 0.05) return i;
@@ -199,18 +202,26 @@ class RulerMarksElement extends UIElement {
 }
 
 /**
- * Lives inside the More popover. Moves focus to the first key when the panel opens, and
- * closes it when focus leaves for something outside the panel and its trigger.
+ * Lives inside the More popover. Names the panel after its key, moves focus to the first key
+ * when it opens, and closes it when the player grows past the small layout, where the key that
+ * opened it is hidden. Video.js already closes it when focus leaves.
  */
 class OverflowElement extends HTMLElement {
   #disconnect: AbortController | null = null;
+  #resize: ResizeObserver | null = null;
 
   connectedCallback(): void {
-    const popover = this.closest('media-popover') as (HTMLElement & { close?: () => void }) | null;
+    const popover = this.closest('media-popover') as (HTMLElement & { close?: () => void; open?: boolean }) | null;
     if (!popover) return;
     this.#disconnect?.abort();
     this.#disconnect = new AbortController();
     const { signal } = this.#disconnect;
+
+    const label = popover.previousElementSibling?.querySelector('.pl-more-label');
+    if (label) {
+      label.id ||= `pl-more-label-${Math.random().toString(36).slice(2, 8)}`;
+      popover.setAttribute('aria-labelledby', label.id);
+    }
 
     popover.addEventListener(
       'open-change',
@@ -221,21 +232,20 @@ class OverflowElement extends HTMLElement {
       { signal }
     );
 
-    popover.addEventListener(
-      'focusout',
-      (event) => {
-        // Focus moving to nowhere (a click on empty page) also closes it.
-        const next = (event as FocusEvent).relatedTarget as Element | null;
-        if (next && (popover.contains(next) || next.closest?.(`[commandfor="${popover.id}"]`))) return;
-        popover.close?.();
-      },
-      { signal }
-    );
+    const player = popover.closest('.pl');
+    if (player) {
+      this.#resize = new ResizeObserver(([entry]) => {
+        if (popover.open && (entry?.contentRect.width ?? 0) >= SMALL_PLAYER) popover.close?.();
+      });
+      this.#resize.observe(player);
+    }
   }
 
   disconnectedCallback(): void {
     this.#disconnect?.abort();
     this.#disconnect = null;
+    this.#resize?.disconnect();
+    this.#resize = null;
   }
 }
 
