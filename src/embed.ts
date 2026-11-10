@@ -34,7 +34,8 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
     : '';
   player.innerHTML = template.replace(
     MEDIA_PLACEHOLDER,
-    `<mux-video src="${attr(options.src)}" playsinline crossorigin>${track}</mux-video>`
+    // Without a src the media stays idle, so a page can mount first and set the source later.
+    `<mux-video${options.src ? ` src="${attr(options.src)}"` : ''} playsinline crossorigin>${track}</mux-video>`
   );
 
   // The i18n provider follows the page's lang, so the skin speaks the page's language.
