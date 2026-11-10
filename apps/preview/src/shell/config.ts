@@ -18,4 +18,5 @@ export const storageKey = 'videojs-skin-workbench:plate';
 export const defaultWidth = 896;
 
 /** Languages Video.js ships translations for; the player loads the selected one itself. */
-export const locales = ["en","ar","az","bs","bg","bn","ca","cs","cy","da","de","el","es","et","eu","fa","fi","fr","gd","gl","he","hi","hr","hu","id","it","ja","ko","lt","lv","mr","nb","nl","nn","ne","oc","pl","pt-BR","pt-PT","ro","ru","sk","sl","sr","sv","te","th","tr","uk","vi","zh-CN","zh-TW"] as const;
+// The languages the skin translates its own words into, plus English.
+export const locales = ["en","ar","de","es","fr","ro","ru"] as const;

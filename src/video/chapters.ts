@@ -36,6 +36,7 @@ class ChaptersElement extends UIElement {
   #signature = '';
   #current = -2;
   #list: HTMLOListElement | null = null;
+  #resize: ResizeObserver | null = null;
   #disconnect: AbortController | null = null;
 
   override connectedCallback(): void {
@@ -52,6 +53,10 @@ class ChaptersElement extends UIElement {
     super.disconnectedCallback();
     this.#disconnect?.abort();
     this.#disconnect = null;
+    this.#resize?.disconnect();
+    this.#resize = null;
+    // Rebuild the list (and its listeners) when the element comes back.
+    this.#signature = '';
   }
 
   override update(changed: PropertyValues): void {
@@ -126,6 +131,8 @@ class ChaptersElement extends UIElement {
 
       const title = document.createElement('span');
       title.className = 'pl-chapter-title';
+      // A Latin name on an Arabic page keeps its own direction.
+      title.dir = 'auto';
       title.textContent = cue.text;
 
       button.append(num, title);
@@ -144,7 +151,11 @@ class ChaptersElement extends UIElement {
 
     const signal = this.#disconnect?.signal;
     list.addEventListener('scroll', this.#markMore, { passive: true, signal });
-    requestAnimationFrame(this.#markMore);
+    // Size changes (fullscreen, a turned phone, fonts arriving) move the end too.
+    this.#resize?.disconnect();
+    this.#resize = new ResizeObserver(this.#markMore);
+    this.#resize.observe(list);
+    this.#markMore();
     if (focused >= 0) list.querySelectorAll<HTMLButtonElement>('.pl-chapter')[Math.min(focused, cues.length - 1)]?.focus();
   }
 
@@ -226,8 +237,12 @@ class OverflowElement extends HTMLElement {
     popover.addEventListener(
       'open-change',
       (event) => {
-        if (!(event as CustomEvent<{ open: boolean }>).detail?.open) return;
-        requestAnimationFrame(() => this.querySelector<HTMLElement>('.pl-btn:not([hidden])')?.focus());
+        if ((event as CustomEvent<{ open: boolean }>).detail?.open) {
+          requestAnimationFrame(() => this.querySelector<HTMLElement>('.pl-btn:not([hidden])')?.focus());
+        } else if (this.contains(document.activeElement)) {
+          // Closing hides the focused key: hand focus back to the More key.
+          (popover.previousElementSibling as HTMLElement | null)?.focus();
+        }
       },
       { signal }
     );
@@ -235,7 +250,12 @@ class OverflowElement extends HTMLElement {
     const player = popover.closest('.pl');
     if (player) {
       this.#resize = new ResizeObserver(([entry]) => {
-        if (popover.open && (entry?.contentRect.width ?? 0) >= SMALL_PLAYER) popover.close?.();
+        if (!popover.open || (entry?.contentRect.width ?? 0) < SMALL_PLAYER) return;
+        // The More key hides at this width too, so focus goes to the play key.
+        if (this.contains(document.activeElement)) {
+          player.querySelector<HTMLElement>('.pl-controls > .pl-btn-play')?.focus();
+        }
+        popover.close?.();
       });
       this.#resize.observe(player);
     }

@@ -559,8 +559,11 @@
         }
 
         @supports selector(::-webkit-scrollbar) {
+          /* Both reset: the theme sets scrollbar-color on the player, and any colour here would
+             make Chromium ignore the ::-webkit-scrollbar rules below. */
           .pl-chapter-list {
             scrollbar-width: auto;
+            scrollbar-color: auto;
           }
         }
 
@@ -627,14 +630,15 @@
       font-variant-numeric: tabular-nums;
     }
 
+    /* In the index column a long name (a domain) wraps instead of being cut. */
     .pl-chapter-title {
-      overflow: hidden;
+      min-width: 0;
       font-family: var(--pl-serif);
       font-weight: 300;
       font-size: clamp(17px, 2.1cqi, 22px);
       line-height: 1.2;
       letter-spacing: -0.005em;
-      text-overflow: ellipsis;
+      overflow-wrap: anywhere;
     }
 
     @container pl (width < 760px) {
@@ -1196,7 +1200,7 @@
 
     /* Rate after the word, from the button's own state. */
     .pl-btn-speed::after {
-      content: "\00D7" attr(data-rate);
+      content: attr(data-rate) "\00D7";
       color: var(--pl-faint);
       letter-spacing: 0.04em;
       font-variant-numeric: tabular-nums;
@@ -1525,6 +1529,30 @@
       :scope:is(:fullscreen, [data-fullscreen]) .pl-index {
         overflow-y: auto;
       }
+    }
+
+    /* Upright fullscreen: the picture keeps 16:9 and the plate centres on the screen, so the
+       registration marks frame the picture and not a column of black. */
+    @media (orientation: portrait) {
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
+        align-content: center;
+        grid-template-rows: auto auto auto auto;
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
+        grid-template-rows: auto auto;
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before {
+        aspect-ratio: 16 / 9;
+        height: auto;
+      }
+    }
+
+    /* Arabic is joined script: letter-spacing breaks the joins, so the spaced capitals of the
+       mono labels go plain. */
+    :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn, .pl-indicator, .pl-chapter-num) {
+      letter-spacing: 0;
     }
 
     /* ------------------------------------------------------------------ Captions */
