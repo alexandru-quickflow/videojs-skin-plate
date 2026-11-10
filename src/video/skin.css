@@ -1710,11 +1710,20 @@
       line-height: 1.2;
     }
 
-    .pl-dialog-description {
+    .pl-dialog-hint {
       font-family: var(--pl-serif);
       font-size: 16px;
       line-height: 1.5;
       color: var(--pl-mute);
+    }
+
+    /* The media's own message is for a bug report: small, in mono, after the plain sentence. */
+    .pl-dialog-description {
+      font-family: var(--pl-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+      color: var(--pl-faint);
     }
 
     .pl-dialog-close {

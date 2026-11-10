@@ -8,13 +8,13 @@ import '@videojs/html/i18n/locales/ru/register';
 import '@videojs/html/i18n/locales/ar/register';
 
 /** Strings for the skin's own labels. English is the text inside each <media-text>. */
-const strings: Record<string, { plate: string; status: string; index: string; exit: string; more: string }> = {
-  de: { plate: 'Tafel', status: 'Status', index: 'Index', exit: 'Beenden', more: 'Mehr' },
-  fr: { plate: 'Planche', status: 'État', index: 'Index', exit: 'Quitter', more: 'Plus' },
-  es: { plate: 'Lámina', status: 'Estado', index: 'Índice', exit: 'Salir', more: 'Más' },
-  ro: { plate: 'Planșa', status: 'Stare', index: 'Index', exit: 'Ieși', more: 'Mai mult' },
-  ru: { plate: 'Лист', status: 'Статус', index: 'Указатель', exit: 'Выйти', more: 'Ещё' },
-  ar: { plate: 'لوحة', status: 'الحالة', index: 'الفهرس', exit: 'خروج', more: 'المزيد' },
+const strings: Record<string, { plate: string; status: string; index: string; exit: string; more: string; errorHint: string }> = {
+  de: { plate: 'Tafel', status: 'Status', index: 'Index', exit: 'Beenden', more: 'Mehr', errorHint: "Das Video wurde nicht geladen. Prüfe die Verbindung und versuche es erneut." },
+  fr: { plate: 'Planche', status: 'État', index: 'Index', exit: 'Quitter', more: 'Plus', errorHint: "La vidéo ne s'est pas chargée. Vérifiez votre connexion et réessayez." },
+  es: { plate: 'Lámina', status: 'Estado', index: 'Índice', exit: 'Salir', more: 'Más', errorHint: "El vídeo no se ha cargado. Comprueba la conexión y vuelve a intentarlo." },
+  ro: { plate: 'Planșa', status: 'Stare', index: 'Index', exit: 'Ieși', more: 'Mai mult', errorHint: "Video-ul nu s-a încărcat. Verifică conexiunea și încearcă din nou." },
+  ru: { plate: 'Лист', status: 'Статус', index: 'Указатель', exit: 'Выйти', more: 'Ещё', errorHint: "Видео не загрузилось. Проверьте подключение и попробуйте ещё раз." },
+  ar: { plate: 'لوحة', status: 'الحالة', index: 'الفهرس', exit: 'خروج', more: 'المزيد', errorHint: "لم يتم تحميل الفيديو. تحقّق من الاتصال وحاول مرة أخرى." },
 };
 
 // The `pl` namespace is the skin's own; Video.js types only know its built-in keys.

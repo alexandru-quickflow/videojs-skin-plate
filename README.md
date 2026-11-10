@@ -73,7 +73,7 @@ On the skin's container (`<media-container class="media-skin pl">`):
 npm run build:embed
 ```
 
-writes `dist-embed/plate-embed.js` and `plate-embed.css`, a single module with Video.js, the Mux media element and the skin, plus one small chunk per Video.js locale. The main module is about 255 KB gzipped, most of it hls.js, so load it on demand:
+writes `dist-embed/plate-embed.js` and `plate-embed.css`, a single module with Video.js, the Mux media element and the skin, plus one small chunk per Video.js locale. The main module is about 270 KB gzipped, most of it hls.js, so load it on demand:
 
 ```js
 const { mountPlate } = await import('/plate/plate-embed.js');
