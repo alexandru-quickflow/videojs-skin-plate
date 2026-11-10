@@ -5,52 +5,127 @@
  */
 
 @layer base.theme {
+  /*
+   * Public properties. Set any of them on the player or on an ancestor:
+   *   --plate-accent      where you are: the play key, the playing chapter, the status dot
+   *   --plate-on-accent   text on the accent (the play key)
+   *   --plate-playhead    the moving playhead and the played bar
+   *   --plate-ink         behind the plate in fullscreen
+   *   --plate-surface     the plate
+   *   --plate-raised      raised parts (the More panel, the error dialog)
+   *   --plate-print       text and every hairline, mixed down from it
+   *   --plate-font-serif  timecode and chapter titles
+   *   --plate-font-mono   labels and keys
+   *   --plate-radius, --plate-radius-sm
+   *   --plate-number      the plate's number in the head, a string: "02"
+   *   --plate-word-ready, -playing, -paused, -loading, -ended, -error: the status words
+   * Or pick a theme with data-plate-theme="night | blueprint | signal | auto" on the player
+   * or an ancestor.
+   */
   .media-skin.pl {
-    /* Public Video.js properties. */
-    --media-font-family: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
-    --media-accent-color: #2bd4bd;
-    --media-video-border-radius: 10px;
+    --media-font-family: var(--plate-font-mono, "JetBrains Mono", ui-monospace, "SF Mono", monospace);
+    --media-accent-color: var(--plate-accent, #2bd4bd);
+    --media-video-border-radius: var(--plate-radius-sm, 10px);
 
-    /* Ground and print, the site's own tokens. Measured against the plate surface. */
-    --pl-ink: #04080b;
-    --pl-surface: #0c1013;
-    --pl-raised: #151a1c;
-    --pl-paper: #e9f2f0;
-    --pl-mute: rgb(233 242 240 / 0.7);
-    --pl-faint: rgb(233 242 240 / 0.56);
-    --pl-line: rgb(224 240 238 / 0.1);
-    --pl-line-strong: rgb(224 240 238 / 0.22);
-    --pl-line-soft: rgb(224 240 238 / 0.06);
+    --pl-ink: var(--plate-ink, #04080b);
+    --pl-surface: var(--plate-surface, #0c1013);
+    --pl-raised: var(--plate-raised, #151a1c);
+    --pl-paper: var(--plate-print, #e9f2f0);
+    --pl-mute: color-mix(in srgb, var(--pl-paper) 70%, transparent);
+    --pl-faint: color-mix(in srgb, var(--pl-paper) 56%, transparent);
+    --pl-line: color-mix(in srgb, var(--pl-paper) 10%, transparent);
+    --pl-line-strong: color-mix(in srgb, var(--pl-paper) 22%, transparent);
+    --pl-line-soft: color-mix(in srgb, var(--pl-paper) 6%, transparent);
     /* Slider tracks: at least 3:1 against the surface (WCAG 1.4.11). */
-    --pl-track: rgb(224 240 238 / 0.4);
-    /* Brighter than the track, quieter than the red played bar. */
-    --pl-track-buffer: rgb(224 240 238 / 0.5);
+    --pl-track: color-mix(in srgb, var(--pl-paper) 40%, transparent);
+    /* Brighter than the track, quieter than the played bar. */
+    --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 50%, transparent);
 
-    /* Two saturated colours: teal is where you are, hot is the moving playhead. */
-    --pl-teal: var(--media-accent-color, #2bd4bd);
-    --pl-hot: #ff5f45;
-    --pl-on-teal: #04171a;
+    /* Two saturated colours: the accent is where you are, the playhead is time moving. */
+    --pl-teal: var(--plate-accent, #2bd4bd);
+    --pl-hot: var(--plate-playhead, #ff5f45);
+    --pl-on-teal: var(--plate-on-accent, #04171a);
 
-    --pl-serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --pl-serif: var(--plate-font-serif, "Newsreader", Georgia, "Times New Roman", serif);
     --pl-mono: var(--media-font-family);
 
-    --pl-radius: 16px;
-    --pl-radius-sm: 10px;
+    --pl-radius: var(--plate-radius, 16px);
+    --pl-radius-sm: var(--plate-radius-sm, 10px);
     --pl-pad: clamp(12px, 2.4cqi, 24px);
     --pl-gap: clamp(10px, 1.8cqi, 18px);
     --pl-bezel: clamp(10px, 1.6cqi, 16px);
     --pl-index-w: clamp(190px, 27cqi, 290px);
     --pl-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --pl-grain: 0.18;
+    --pl-grid: linear-gradient(transparent, transparent);
+  }
+
+  /* Blueprint: white drafting paper, a fine grid, blue ink, a red playhead. */
+  :where([data-plate-theme="blueprint"]) .media-skin.pl,
+  .media-skin.pl[data-plate-theme="blueprint"] {
+    --plate-ink: #e9eef5;
+    --plate-surface: #f8fafc;
+    --plate-raised: #ffffff;
+    --plate-print: #0c2d55;
+    --plate-accent: #1d57b8;
+    --plate-on-accent: #ffffff;
+    --plate-playhead: #c7342a;
+    /* On a light ground the same mixes read weaker: raise them back to AA. */
+    --pl-faint: color-mix(in srgb, var(--pl-paper) 70%, transparent);
+    --pl-mute: color-mix(in srgb, var(--pl-paper) 82%, transparent);
+    --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
+    --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
+    --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
+    --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
+    --pl-grain: 0;
+    --pl-grid:
+      linear-gradient(color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
+    color-scheme: light;
+  }
+
+  /* Signal: the night plate with an amber accent and a blue playhead. */
+  :where([data-plate-theme="signal"]) .media-skin.pl,
+  .media-skin.pl[data-plate-theme="signal"] {
+    --plate-accent: #ffb020;
+    --plate-on-accent: #1d1300;
+    --plate-playhead: #4aa8ff;
+  }
+
+  /* Auto: night in a dark system theme, blueprint in a light one. */
+  @media (prefers-color-scheme: light) {
+    :where([data-plate-theme="auto"]) .media-skin.pl,
+    .media-skin.pl[data-plate-theme="auto"] {
+      --plate-ink: #e9eef5;
+      --plate-surface: #f8fafc;
+      --plate-raised: #ffffff;
+      --plate-print: #0c2d55;
+      --plate-accent: #1d57b8;
+      --plate-on-accent: #ffffff;
+      --plate-playhead: #c7342a;
+      /* On a light ground the same mixes read weaker: raise them back to AA. */
+      --pl-faint: color-mix(in srgb, var(--pl-paper) 70%, transparent);
+      --pl-mute: color-mix(in srgb, var(--pl-paper) 82%, transparent);
+      --pl-line: color-mix(in srgb, var(--pl-paper) 14%, transparent);
+      --pl-line-strong: color-mix(in srgb, var(--pl-paper) 30%, transparent);
+      --pl-track: color-mix(in srgb, var(--pl-paper) 52%, transparent);
+      --pl-track-buffer: color-mix(in srgb, var(--pl-paper) 64%, transparent);
+      --pl-grain: 0;
+      --pl-grid:
+        linear-gradient(color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+        linear-gradient(90deg, color-mix(in srgb, #1d57b8 7%, transparent) 1px, transparent 1px) 0 0 / 24px 24px;
+      color-scheme: light;
+    }
   }
 }
 
 @layer base.preferences {
   @media (prefers-contrast: more) {
     .media-skin.pl {
-      --pl-mute: rgb(233 242 240 / 0.9);
-      --pl-faint: rgb(233 242 240 / 0.8);
-      --pl-line: rgb(224 240 238 / 0.35);
-      --pl-line-strong: rgb(224 240 238 / 0.55);
+      --pl-mute: color-mix(in srgb, var(--pl-paper) 90%, transparent);
+      --pl-faint: color-mix(in srgb, var(--pl-paper) 80%, transparent);
+      --pl-line: color-mix(in srgb, var(--pl-paper) 35%, transparent);
+      --pl-line-strong: color-mix(in srgb, var(--pl-paper) 55%, transparent);
     }
   }
 }
@@ -86,8 +161,9 @@
       border: 1px solid var(--pl-line-strong);
       border-radius: var(--pl-radius);
       background:
-        radial-gradient(60% 50% at 12% 0%, rgb(43 212 189 / 0.07), transparent 70%),
-        radial-gradient(40% 40% at 92% 8%, rgb(255 95 69 / 0.05), transparent 70%),
+        radial-gradient(60% 50% at 12% 0%, color-mix(in srgb, var(--pl-teal) 7%, transparent), transparent 70%),
+        radial-gradient(40% 40% at 92% 8%, color-mix(in srgb, var(--pl-hot) 5%, transparent), transparent 70%),
+        var(--pl-grid),
         var(--pl-surface);
       isolation: isolate;
     }
@@ -100,7 +176,7 @@
       z-index: -1;
       border-radius: inherit;
       pointer-events: none;
-      opacity: 0.18;
+      opacity: var(--pl-grain);
       mix-blend-mode: soft-light;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
     }
@@ -172,7 +248,7 @@
     }
 
     .pl-status-word::after {
-      content: var(--pl-w-ready);
+      content: var(--plate-word-ready, var(--pl-w-ready));
     }
 
     :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word {
@@ -181,7 +257,7 @@
 
     :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::before {
       background: var(--pl-teal);
-      box-shadow: 0 0 8px rgb(43 212 189 / 0.6);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--pl-teal) 60%, transparent);
     }
 
     :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word {
@@ -257,23 +333,23 @@
     }
 
     :scope:has(.pl-btn-play[data-started]:not([data-paused])) .pl-status-word::after {
-      content: var(--pl-w-playing);
+      content: var(--plate-word-playing, var(--pl-w-playing));
     }
 
     :scope:has(.pl-btn-play[data-started][data-paused]) .pl-status-word::after {
-      content: var(--pl-w-paused);
+      content: var(--plate-word-paused, var(--pl-w-paused));
     }
 
     :scope:has(.pl-stage .pl-buffering[data-visible]) .pl-status-word::after {
-      content: var(--pl-w-loading);
+      content: var(--plate-word-loading, var(--pl-w-loading));
     }
 
     :scope:has(.pl-btn-play[data-started][data-ended]) .pl-status-word::after {
-      content: var(--pl-w-ended);
+      content: var(--plate-word-ended, var(--pl-w-ended));
     }
 
     :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word::after {
-      content: var(--pl-w-error);
+      content: var(--plate-word-error, var(--pl-w-error));
     }
 
     /* ------------------------------------------------------------------ Body: stage and index */
@@ -407,7 +483,7 @@
       place-items: center;
       pointer-events: none;
       border-radius: var(--media-video-border-radius);
-      background: rgb(4 8 11 / 0.4);
+      background: color-mix(in srgb, var(--pl-ink) 40%, transparent);
     }
 
     .pl-buffering:not([data-visible]) {
@@ -452,7 +528,7 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--pl-paper);
-      background: rgb(12 16 19 / 0.92);
+      background: color-mix(in srgb, var(--pl-surface) 92%, transparent);
       font-variant-numeric: tabular-nums;
     }
 
@@ -687,13 +763,13 @@
 
     .pl-chapter[data-active]::before {
       background: var(--pl-teal);
-      box-shadow: 0 0 8px rgb(43 212 189 / 0.7);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--pl-teal) 70%, transparent);
     }
 
     @container pl (width < 760px) {
       .pl-chapter[data-active] {
-        border-color: rgb(43 212 189 / 0.45);
-        background: rgb(43 212 189 / 0.08);
+        border-color: color-mix(in srgb, var(--pl-teal) 45%, transparent);
+        background: color-mix(in srgb, var(--pl-teal) 8%, transparent);
       }
     }
 
@@ -778,7 +854,7 @@
     }
 
     .pl-ruler-mark[data-active]::after {
-      background: rgb(43 212 189 / 0.6);
+      background: color-mix(in srgb, var(--pl-teal) 60%, transparent);
     }
 
     .pl-time-slider-chapters {
@@ -876,7 +952,7 @@
       height: 10px;
       border-radius: 50%;
       background: var(--pl-hot);
-      box-shadow: 0 0 0 3px var(--pl-surface), 0 0 12px rgb(255 95 69 / 0.55);
+      box-shadow: 0 0 0 3px var(--pl-surface), 0 0 12px color-mix(in srgb, var(--pl-hot) 55%, transparent);
       translate: -50% 0;
       transition: scale var(--media-duration-fast) var(--pl-ease);
     }
@@ -1114,13 +1190,13 @@
     @media (hover: hover) and (pointer: fine) {
       .pl-btn-play:hover {
         color: var(--pl-on-teal);
-        background: #5fe6d3;
+        background: color-mix(in srgb, var(--pl-teal), white 25%);
       }
     }
 
     .pl-btn-play:active {
       color: var(--pl-on-teal);
-      background: #24bba7;
+      background: color-mix(in srgb, var(--pl-teal), black 12%);
     }
 
     .pl-btn-glyph {
@@ -1412,7 +1488,7 @@
       inset: 0;
       z-index: 40;
       border-radius: var(--pl-radius);
-      background: rgb(4 8 11 / 0.8);
+      background: color-mix(in srgb, var(--pl-ink) 80%, transparent);
     }
 
     .pl-dialog-backdrop:not([data-open]) {
@@ -1553,6 +1629,47 @@
        mono labels go plain. */
     :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn, .pl-indicator, .pl-chapter-num) {
       letter-spacing: 0;
+    }
+
+    /* ------------------------------------------------------------------ Options on the player */
+
+    /* The plate's number, from --plate-number. */
+    .pl-plate-number::before {
+      content: var(--plate-number, "01");
+    }
+
+    /* data-head="none": no head line. */
+    :scope[data-head="none"] .pl-head {
+      display: none;
+    }
+
+    /* data-index="none": no chapter index (the ruler still marks the chapters). */
+    :scope[data-index="none"] .pl-index {
+      display: none;
+    }
+
+    :scope[data-index="none"] .pl-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* data-index="start": the index column before the picture instead of after it. */
+    @container pl (width >= 760px) {
+      :scope[data-index="start"] .pl-body {
+        grid-template-columns: var(--pl-index-w) minmax(0, 1fr);
+      }
+
+      :scope[data-index="start"] .pl-index {
+        order: -1;
+        padding: var(--pl-bezel) var(--pl-gap) var(--pl-bezel) 0;
+        border-inline-start: 0;
+        border-inline-end: 1px solid var(--pl-line);
+        margin-inline: 0 var(--pl-gap);
+      }
+    }
+
+    /* data-ruler="sparse": only the tall tick every tenth, no minor ticks. */
+    :scope[data-ruler="sparse"] .pl-time-slider::before {
+      background: repeating-linear-gradient(90deg, var(--pl-line-strong) 0 1px, transparent 1px 10%) 0 0 / calc(100% + 1px) 12px no-repeat;
     }
 
     /* ------------------------------------------------------------------ Captions */
