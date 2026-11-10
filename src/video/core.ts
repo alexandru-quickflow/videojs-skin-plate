@@ -39,6 +39,11 @@ import '@videojs/html/ui/quality-radio-group';
 import '@videojs/html/ui/playback-rate-radio-group';
 import '@videojs/html/ui/captions-radio-group';
 import '@videojs/html/ui/menu-item';
+import '@videojs/html/ui/pip-button';
+import '@videojs/html/ui/tooltip';
+import '@videojs/html/ui/tooltip-group';
+import '@videojs/html/ui/tooltip-label';
+import '@videojs/html/ui/tooltip-shortcut';
 import '@videojs/html/ui/hotkey';
 import '@videojs/html/ui/gesture';
 import '@videojs/html/ui/status-announcer';
@@ -58,10 +63,12 @@ import mutedIcon from '@phosphor-icons/core/assets/fill/speaker-slash-fill.svg?r
 import expandIcon from '@phosphor-icons/core/assets/bold/corners-out-bold.svg?raw';
 import collapseIcon from '@phosphor-icons/core/assets/bold/corners-in-bold.svg?raw';
 import moreIcon from '@phosphor-icons/core/assets/bold/dots-three-bold.svg?raw';
+import pipIcon from '@phosphor-icons/core/assets/bold/picture-in-picture-bold.svg?raw';
 import './chapters';
 
 // The play key's glyph, and on small players the icons that stand in for the words of
-// mute, fullscreen and the More key. Everything else is a word.
+// mute, fullscreen and the More key, and picture-in-picture, which has no short word.
+// Everything else is a word.
 registerIcons('pl', {
   play: playIcon,
   pause: pauseIcon,
@@ -71,4 +78,5 @@ registerIcons('pl', {
   expand: expandIcon,
   collapse: collapseIcon,
   more: moreIcon,
+  pip: pipIcon,
 });

@@ -78,7 +78,7 @@
 <media-time class="pl-time-duration" type="duration">
 </media-time>
 </div>
-<div class="pl-controls">
+<media-tooltip-group class="pl-controls">
 <media-play-button class="pl-btn pl-btn-play">
 <span class="pl-btn-glyph" aria-hidden="true">
 <media-icon family="pl" name="play" class="pl-icon pl-play-play"></media-icon>
@@ -91,12 +91,15 @@
 <media-text class="pl-play-restart" token="buttons.replay">Replay</media-text>
 </span>
 </media-play-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <media-seek-button seconds="-10" class="pl-btn pl-btn-seek">
 <span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">&minus;10</bdi></span>
 </media-seek-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <media-seek-button seconds="10" class="pl-btn pl-btn-seek">
 <span class="pl-btn-text" aria-hidden="true"><bdi dir="ltr">+10</bdi></span>
 </media-seek-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <span class="pl-sep" aria-hidden="true"></span>
 <div class="pl-volume">
 <media-mute-button class="pl-btn pl-btn-mute">
@@ -109,6 +112,7 @@
 <media-text class="pl-mute-off" token="buttons.unmute">Unmute</media-text>
 </span>
 </media-mute-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <media-volume-slider class="pl-volume-slider">
 <media-slider-track class="pl-volume-track">
 <media-slider-fill class="pl-volume-fill">
@@ -154,6 +158,11 @@
 <media-captions-button class="pl-btn pl-btn-cc">
 <span class="pl-btn-text" aria-hidden="true"><media-text token="menu.captions">Captions</media-text></span>
 </media-captions-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
+<media-pip-button class="pl-btn pl-btn-pip">
+<span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="pip" class="pl-icon"></media-icon></span>
+</media-pip-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <media-fullscreen-button class="pl-btn pl-btn-full">
 <span class="pl-btn-glyph pl-only-narrow" aria-hidden="true">
 <media-icon family="pl" name="expand" class="pl-icon pl-full-enter"></media-icon>
@@ -161,6 +170,7 @@
 </span>
 <span class="pl-btn-text" aria-hidden="true"><media-text class="pl-full-enter" token="status.fullscreen">Fullscreen</media-text><media-text class="pl-full-exit" token="pl.exit">Exit</media-text></span>
 </media-fullscreen-button>
+<media-tooltip side="top" class="pl-tooltip"><media-tooltip-label></media-tooltip-label><media-tooltip-shortcut class="pl-tooltip-key"></media-tooltip-shortcut></media-tooltip>
 <!-- More: a Video.js menu with a page per setting. pl-overflow links each item to its page
      with ids of its own, so two players on a page never share them. -->
 <pl-overflow class="pl-overflow">
@@ -215,7 +225,7 @@
 </media-menu-content>
 </media-menu>
 </pl-overflow>
-</div>
+</media-tooltip-group>
 </div>
 </div>
 <media-error-dialog>
@@ -264,6 +274,8 @@
 <media-hotkey keys="f" action="toggleFullscreen">
 </media-hotkey>
 <media-hotkey keys="c" action="toggleSubtitles">
+</media-hotkey>
+<media-hotkey keys="i" action="togglePictureInPicture">
 </media-hotkey>
 <media-gesture type="tap" action="togglePaused" pointer="mouse" region="center">
 </media-gesture>

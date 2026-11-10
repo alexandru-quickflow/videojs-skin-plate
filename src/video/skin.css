@@ -1677,6 +1677,67 @@
       display: none;
     }
 
+    /* ------------------------------------------------------------------ Picture-in-picture and tooltips */
+
+    /* PiP has no short word, so it is a glyph key, named in its tooltip. */
+    .pl-btn-pip {
+      padding-inline: 0;
+      color: var(--pl-paper);
+    }
+
+    .pl-btn-pip .pl-btn-glyph {
+      width: 18px;
+      height: 18px;
+    }
+
+    .pl-btn-pip[data-pip] {
+      color: var(--pl-teal);
+    }
+
+    /* Phones play picture-in-picture from their own controls; the row keeps four keys. */
+    @container pl (width < 600px) {
+      .pl-controls > .pl-btn-pip {
+        display: none;
+      }
+    }
+
+    /* Tooltips: the key's name and its shortcut, as a small label above it. */
+    .pl-tooltip {
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      padding: 6px 10px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: calc(var(--pl-radius-sm) - 4px);
+      background: var(--pl-surface);
+      box-shadow: 0 8px 20px rgb(0 0 0 / 0.35);
+      font-family: var(--pl-mono);
+      font-size: 11px;
+      font-weight: var(--pl-label-weight, 400);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--pl-paper);
+      pointer-events: none;
+      translate: 0 -8px;
+    }
+
+    .pl-tooltip:is([data-open], :popover-open) {
+      display: flex;
+    }
+
+    .pl-tooltip-key {
+      padding: 1px 6px;
+      border: 1px solid var(--pl-line-strong);
+      border-radius: 4px;
+      color: var(--pl-mute);
+      text-transform: none;
+    }
+
+    .pl-tooltip-key:empty {
+      display: none;
+    }
+
     /* ------------------------------------------------------------------ Error dialog */
 
     .pl-dialog-backdrop {
