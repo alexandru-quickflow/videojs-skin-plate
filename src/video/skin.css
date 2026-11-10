@@ -525,11 +525,21 @@
       /* Narrow: a horizontal strip of entries, scrolled sideways. */
       .pl-chapter-list {
         display: flex;
-        gap: 6px;
+        gap: 8px;
         overflow-x: auto;
         padding-bottom: 4px;
         scroll-snap-type: x proximity;
-        scrollbar-width: thin;
+        scrollbar-width: none;
+        /* The last chip fades out at the edge, so the strip reads as one that scrolls. */
+        mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+      }
+
+      .pl-chapter-list:dir(rtl) {
+        mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
+      }
+
+      .pl-chapter-list::-webkit-scrollbar {
+        display: none;
       }
 
       .pl-chapter-list > li {
@@ -591,10 +601,21 @@
     }
 
     @container pl (width < 760px) {
+      /* A chip: border, tint and colour mark the playing one, so no dot, and even padding. */
       .pl-chapter {
         width: auto;
-        padding: 8px 14px 8px 18px;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
         border: 1px solid var(--pl-line);
+      }
+
+      .pl-chapter::before {
+        display: none;
+      }
+
+      .pl-chapter-num {
+        line-height: 1;
       }
 
       .pl-chapter-title {
