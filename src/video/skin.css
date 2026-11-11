@@ -736,7 +736,8 @@
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
       align-items: baseline;
-      gap: 12px;
+      /* No row gap: the frame below the name spaces itself, so it can fold away to nothing. */
+      gap: 0 12px;
       width: 100%;
       min-height: 44px;
       padding: 8px 10px 8px 16px;
@@ -816,7 +817,8 @@
       display: block;
       min-width: 96px;
       max-width: 96px;
-      margin-top: 6px;
+      /* chapters.ts counts on this space when it fits the index. */
+      margin-top: 18px;
       overflow: hidden;
       border-radius: 3px;
       box-shadow: 0 0 0 1px var(--pl-line-strong);
@@ -824,6 +826,28 @@
       transition:
         opacity var(--media-duration-fast) ease-out,
         box-shadow var(--media-duration-fast) ease-out;
+    }
+
+    /* A frame that moves to another chapter, or arrives late, opens and folds instead of jumping.
+       From the index's first layout on (chapters.ts marks it settled). */
+    @media (prefers-reduced-motion: no-preference) {
+      .pl-index[data-settled] .pl-chapter-thumb {
+        transition:
+          opacity var(--media-duration-fast) ease-out,
+          box-shadow var(--media-duration-fast) ease-out,
+          height 200ms ease-out,
+          margin-top 200ms ease-out;
+      }
+    }
+
+    /* Folded: no frame for this time (a source without a storyboard), or a tight index keeps only the
+       playing chapter's. The height beats the size Video.js writes on the element. */
+    .pl-chapter-thumb[data-hidden],
+    .pl-index[data-tight] .pl-chapter:not([data-active]) .pl-chapter-thumb {
+      height: 0 !important;
+      margin-top: 0;
+      box-shadow: none;
+      opacity: 0;
     }
 
     /* Until Video.js has cut the frame out of the storyboard it shows the whole sheet, a strip as tall
@@ -850,8 +874,7 @@
       box-shadow: 0 0 0 1px var(--pl-teal);
     }
 
-    .pl-chapter-list:has(> li:nth-child(6)) .pl-chapter-thumb,
-    .pl-index[data-tight] .pl-chapter:not([data-active]) .pl-chapter-thumb {
+    .pl-chapter-list:has(> li:nth-child(6)) .pl-chapter-thumb {
       display: none;
     }
 

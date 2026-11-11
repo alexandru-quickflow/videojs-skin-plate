@@ -15,6 +15,9 @@ interface Cue {
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 
+/** The space above a chapter's frame, its margin-top in skin.css. */
+const FRAME_SPACE = 18;
+
 function activeIndex(cues: readonly Cue[], time: number): number {
   for (let i = cues.length - 1; i >= 0; i--) {
     if (time >= cues[i]!.startTime - 0.05) return i;
@@ -107,14 +110,25 @@ class ChaptersElement extends UIElement {
       delete index.dataset.tight;
       return;
     }
-    const thumbs = [...list.querySelectorAll<HTMLElement>('.pl-chapter-thumb')];
-    const shown = thumbs.find((t) => t.offsetHeight > 0);
-    // Each frame takes its own height plus the margin above it.
-    const block = shown ? shown.offsetHeight + parseFloat(getComputedStyle(shown).marginTop) : 60;
-    const hidden = thumbs.filter((t) => t.offsetHeight === 0).length;
-    const full = index.scrollHeight + (index.dataset.tight !== undefined ? hidden * block : 0);
+    // Frames open and fold with a transition, so measure the index as it will be once they settle:
+    // its content without any frame, plus every frame at full size. A frame still waiting for the
+    // storyboard counts too, so the index doesn't open them all and fold them again when it arrives.
+    const thumbs = [...list.querySelectorAll<HTMLElement>('.pl-chapter-thumb')].filter(
+      (t) => getComputedStyle(t).display !== 'none'
+    );
+    const now = thumbs.reduce((sum, t) => sum + t.offsetHeight + parseFloat(getComputedStyle(t).marginTop), 0);
+    // Video.js writes each frame's size on the element; 52px is the box the skin holds until then.
+    const sized = thumbs.find((t) => parseFloat(t.style.height) > 0);
+    const block = (sized ? parseFloat(sized.style.height) : 52) + FRAME_SPACE;
+    const indexBox = index.getBoundingClientRect();
+    const content =
+      list.getBoundingClientRect().bottom - indexBox.top + index.scrollTop + parseFloat(getComputedStyle(index).paddingBottom);
+    const full = content - now + thumbs.length * block;
     if (full > index.clientHeight + 1) index.dataset.tight = '';
     else delete index.dataset.tight;
+    // Frames animate only once the index has its first layout; measuring above would otherwise
+    // make the frames of a new list fold away on screen.
+    if (index.dataset.settled === undefined) requestAnimationFrame(() => (index.dataset.settled = ''));
   };
 
   /** Marks the strip while chips wait past its end, for the fade. */
@@ -190,7 +204,11 @@ class ChaptersElement extends UIElement {
     });
     this.#resize.observe(list);
     const index = this.closest<HTMLElement>('.pl-index');
-    if (index) this.#resize.observe(index);
+    if (index) {
+      this.#resize.observe(index);
+      // A new list lays out still, like the first one.
+      delete index.dataset.settled;
+    }
     this.#markMore();
     this.#fit();
     if (focused >= 0) list.querySelectorAll<HTMLButtonElement>('.pl-chapter')[Math.min(focused, cues.length - 1)]?.focus();
