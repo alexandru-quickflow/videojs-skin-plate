@@ -83,10 +83,14 @@ class ChaptersElement extends UIElement {
       },
       { signal }
     );
-    // Leaving fullscreen folds the panel away, so it isn't open next time.
+    // Leaving fullscreen folds the panel away, so it isn't open next time. A touch tap plays and pauses on the
+    // page, where the keys sit under the picture; in fullscreen the keys fade, so a tap brings them back instead.
     const onFullscreen = () =>
       requestAnimationFrame(() => {
-        if (!container.matches(':fullscreen, [data-fullscreen]')) this.#setOpen(false, false);
+        const full = container.matches(':fullscreen, [data-fullscreen]');
+        if (!full) this.#setOpen(false, false);
+        for (const gesture of container.querySelectorAll<HTMLElement>('media-gesture[data-pl-touch]'))
+          gesture.toggleAttribute('disabled', (gesture.dataset.plTouch === 'fullscreen') !== full);
       });
     document.addEventListener('fullscreenchange', onFullscreen, { signal });
     document.addEventListener('webkitfullscreenchange', onFullscreen, { signal });
