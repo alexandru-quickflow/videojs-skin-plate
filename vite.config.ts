@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
@@ -21,6 +22,8 @@ export default defineConfig({
   server: {
     fs: { allow: [path('.')] },
   },
+  // Tests live beside the skin, not in the workbench root.
+  test: { dir: path('./test') },
   build: {
     outDir: path('./dist'),
     emptyOutDir: true,

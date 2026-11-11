@@ -240,6 +240,10 @@ export function plateProperties(value: WorkbenchParams, { withWords = true } = {
   return out;
 }
 
+/** Plate's own faces are served beside the embed; any other pick comes from Google Fonts. */
+export const usesGoogleFonts = (value: WorkbenchParams): boolean =>
+  value.serif !== 'Newsreader' || value.mono !== 'JetBrains Mono';
+
 /** The Google Fonts stylesheet for the chosen faces. */
 export function fontsUrl(value: WorkbenchParams): string {
   const family = (name: string, axes: string) => `family=${name.replace(/ /g, '+')}${axes}`;
@@ -259,18 +263,21 @@ function loadFonts(value: WorkbenchParams): void {
   document.head.append(link);
 }
 
+/** A value as a JS string inside a <script>: `<` escaped, so no value can close the script tag. */
+const js = (value: string): string => JSON.stringify(value).replace(/</g, '\\u003c');
+
 /** The words as a mountPlate option, or nothing. */
 function wordsOption(value: WorkbenchParams, indent: string): string[] {
   const set = WORD_KEYS.filter((key) => value.words[key]);
   if (!set.length) return [];
-  return [`${indent}words: { ${set.map((key) => `${key}: ${JSON.stringify(value.words[key])}`).join(', ')} },`];
+  return [`${indent}words: { ${set.map((key) => `${key}: ${js(value.words[key])}`).join(', ')} },`];
 }
 
 /** The style option: every property but the number and the words, which have options of their own. */
 function styleOption(value: WorkbenchParams, indent: string): string[] {
   const entries = plateProperties(value, { withWords: false }).filter(([name]) => name !== '--plate-number');
   if (!entries.length) return [];
-  return [`${indent}style: {`, ...entries.map(([n, v]) => `${indent}  '${n}': ${JSON.stringify(v)},`), `${indent}},`];
+  return [`${indent}style: {`, ...entries.map(([n, v]) => `${indent}  '${n}': ${js(v)},`), `${indent}},`];
 }
 
 /** Your theme as a stylesheet: the properties on the player, and the theme it starts from. */
@@ -325,14 +332,14 @@ export function onAccent(hexColor: string): string {
 export function codeSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
   const lines: string[] = [
-    `  src: ${JSON.stringify((custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8')},`,
-    `  chapters: ${JSON.stringify((custom && value.customChapters) || '/chapters.vtt')},`,
+    `  src: ${js((custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8')},`,
+    `  chapters: ${js((custom && value.customChapters) || '/chapters.vtt')},`,
   ];
   if (value.theme !== 'night') lines.push(`  theme: '${value.theme}',`);
   if (value.index !== 'end') lines.push(`  index: '${value.index}',`);
   if (value.ruler !== 'dense') lines.push(`  ruler: '${value.ruler}',`);
   if (!value.head) lines.push('  head: false,');
-  if (value.number) lines.push(`  number: ${JSON.stringify(value.number)},`);
+  if (value.number) lines.push(`  number: ${js(value.number)},`);
   lines.push(...wordsOption(value, '  '), ...styleOption(value, '  '));
   return `const { mountPlate } = await import('${EMBED_BASE}plate-embed.js');\n\nmountPlate(document.querySelector('#reel'), {\n${lines.join('\n')}\n});`;
 }
@@ -347,21 +354,21 @@ export function embedSnippet(value: WorkbenchParams): string {
   const ownLink = custom && value.customSrc;
   const options = [
     ...(ownLink
-      ? [`    src: ${JSON.stringify(ownLink)},`]
+      ? [`    src: ${js(ownLink)},`]
       : ['    playbackId: id,', '    poster: `https://image.mux.com/${id}/thumbnail.webp`,']),
-    `    chapters: ${JSON.stringify((custom && value.customChapters) || 'YOUR_CHAPTERS_LINK')},`,
+    `    chapters: ${js((custom && value.customChapters) || 'YOUR_CHAPTERS_LINK')},`,
     `    title: "My video",`,
   ];
   if (value.theme !== 'night') options.push(`    theme: '${value.theme}',`);
   if (value.index !== 'end') options.push(`    index: '${value.index}',`);
   if (value.ruler !== 'dense') options.push(`    ruler: '${value.ruler}',`);
   if (!value.head) options.push('    head: false,');
-  if (value.number) options.push(`    number: ${JSON.stringify(value.number)},`);
+  if (value.number) options.push(`    number: ${js(value.number)},`);
   options.push(...wordsOption(value, '    '), ...styleOption(value, '    '));
 
   return [
     '<div id="plate-player"></div>',
-    `<link rel="stylesheet" href="${fontsUrl(value)}">`,
+    `<link rel="stylesheet" href="${usesGoogleFonts(value) ? fontsUrl(value) : `${EMBED_BASE}plate-fonts.css`}">`,
     `<link rel="stylesheet" href="${EMBED_BASE}plate-embed.css">`,
     '<script type="module">',
     `  import { mountPlate } from '${EMBED_BASE}plate-embed.js';`,

@@ -9,7 +9,7 @@ import {
 } from '@preview/shell/components/ui/sheet';
 import { useState } from 'react';
 
-import { embedSnippet, type WorkbenchParams } from './params';
+import { embedSnippet, usesGoogleFonts, type WorkbenchParams } from './params';
 
 const CHAPTERS_EXAMPLE = `WEBVTT
 
@@ -64,6 +64,12 @@ export function Guide({ params }: { params: WorkbenchParams }) {
               )}{' '}
               Put your video's name where it says <code className="bg-muted rounded px-1">My video</code>.
             </p>
+            {usesGoogleFonts(params) && (
+              <p>
+                The fonts you picked load from Google Fonts, which sees each visitor's IP address. Plate's own fonts
+                load from this site instead.
+              </p>
+            )}
             <Copyable code={embedSnippet(params)} label="Copy code" />
           </Step>
 

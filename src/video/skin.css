@@ -1723,7 +1723,7 @@
       }
 
       .pl-controls > :is(.pl-btn-seek, .pl-btn-rate, .pl-btn-captions, .pl-btn-audio, .pl-sep),
-      .pl-rate-menu:not(.pl-rate-menu-more),
+      .pl-rate-menu,
       .pl-btn-captions-menu,
       .pl-btn-audio-menu,
       .pl-volume-slider {
