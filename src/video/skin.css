@@ -638,6 +638,13 @@
       display: none;
     }
 
+    /* The panel's close key and the Index key in the row only act in fullscreen. Doubled classes
+       outrank the .pl-btn rule further down. */
+    .pl-btn.pl-index-close,
+    .pl-btn.pl-btn-index {
+      display: none;
+    }
+
     @container pl (width >= 760px) {
       .pl-index {
         padding: var(--pl-bezel) 0 var(--pl-bezel) var(--pl-gap);
@@ -2170,80 +2177,190 @@
 
     /* ------------------------------------------------------------------ Fullscreen */
 
+    /* Fullscreen is the picture, edge to edge. The head, the ruler and the keys lie over it on a
+       shade and fade out while the video plays and nobody moves (Video.js removes
+       data-controls-visible); a pointer, a key or a tap brings them back. The index becomes a panel
+       the Index key opens over the side of the picture. */
     :scope:is(:fullscreen, [data-fullscreen]) {
+      --pl-bezel: 0px;
+      /* The height the ruler and the keys take at the foot of the screen. */
+      --pl-fs-controls: 150px;
+      /* Captions climb over the ruler and keys while they show. */
+      --media-caption-controls-y: calc(var(--pl-fs-controls) * -1);
       width: 100%;
       height: 100%;
       grid-template-rows: minmax(0, 1fr);
       align-content: stretch;
-      background: var(--pl-ink);
+      background: #000;
+    }
+
+    @container pl (width < 1000px) {
+      :scope:is(:fullscreen, [data-fullscreen]) {
+        --pl-fs-controls: 200px;
+      }
     }
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
       grid-template-rows: auto minmax(0, 1fr) auto auto;
       height: 100%;
-      border-radius: 0;
+      overflow: hidden;
       border: 0;
+      border-radius: 0;
+      background: #000;
     }
 
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-plate::after {
+      display: none;
+    }
+
+    /* The shade under the ruler and the keys. */
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-plate::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 1;
+      height: min(340px, 50%);
+      pointer-events: none;
+      background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--pl-ink) 88%, transparent));
+      transition:
+        opacity 200ms ease-out,
+        visibility 0s linear 0s;
+    }
+
+    /* The picture fills the screen behind everything. */
     :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
-      min-height: 0;
+      position: absolute;
+      inset: 0;
+      display: block;
     }
 
-    /* Stacked (narrow) fullscreen: the picture takes the spare height, the chip strip only
-       what it needs. */
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      padding: 0;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before,
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::after,
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-mark {
+      display: none;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-stage > :first-child:not(.pl-poster), .pl-poster, .pl-buffering) {
+      border-radius: 0;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-head, .pl-ruler, .pl-foot) {
+      position: relative;
+      z-index: 2;
+      transition:
+        opacity 200ms ease-out,
+        visibility 0s linear 0s;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-head {
+      grid-row: 1;
+      margin: calc(var(--pl-pad) * -1) calc(var(--pl-pad) * -1) 0;
+      padding: var(--pl-pad) var(--pl-pad) 40px;
+      border-bottom: 0;
+      background: linear-gradient(to bottom, color-mix(in srgb, var(--pl-ink) 70%, transparent), transparent);
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-ruler {
+      grid-row: 3;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-foot {
+      grid-row: 4;
+    }
+
+    /* Idle: the overlay fades, then leaves the way of pointer and screen reader alike. */
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) {
+      cursor: none;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) :is(.pl-head, .pl-ruler, .pl-foot),
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) .pl-plate::before {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 200ms ease-out,
+        visibility 0s linear 200ms;
+    }
+
+    /* The index: a panel over the side of the picture, opened by the Index key. It stops above the
+       ruler, so the keys (Exit among them) stay in reach. */
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-index {
+      position: absolute;
+      inset-block: 0 var(--pl-fs-controls);
+      inset-inline: auto 0;
+      z-index: 3;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      align-content: start;
+      gap: 16px 12px;
+      width: min(420px, 42%);
+      margin: 0;
+      padding: var(--pl-pad);
+      border: 0;
+      border-inline-start: 1px solid var(--pl-line-strong);
+      border-block-end: 1px solid var(--pl-line-strong);
+      border-end-start-radius: var(--pl-radius-sm);
+      background: color-mix(in srgb, var(--pl-surface) 94%, transparent);
+      backdrop-filter: blur(14px);
+      contain: size;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      translate: 100% 0;
+      visibility: hidden;
+      transition:
+        translate 250ms var(--pl-ease),
+        visibility 0s linear 250ms;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-index:dir(rtl) {
+      translate: -100% 0;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-index[data-open] {
+      translate: 0 0;
+      visibility: visible;
+      transition:
+        translate 250ms var(--pl-ease),
+        visibility 0s linear 0s;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-index .pl-chapters {
+      grid-column: 1 / -1;
+    }
+
+    :scope:is(:fullscreen, [data-fullscreen]) .pl-index-close {
+      display: inline-flex;
+    }
+
+    /* The Index key: in fullscreen, when there are chapters to list. */
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-index="none"]) .pl-plate:has(.pl-chapters:not([hidden])) .pl-btn-index {
+      display: inline-flex;
+    }
+
+    .pl-btn-index[aria-expanded="true"] {
+      color: var(--pl-paper);
+      background: var(--pl-line-soft);
+    }
+
+    /* Narrow fullscreen (a phone held upright): no room for a panel; the ruler marks the chapters. */
     @container pl (width < 760px) {
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
-        grid-template-rows: minmax(0, 1fr) auto;
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-index,
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-btn-index {
+        display: none !important;
       }
     }
 
-    /* A phone on its side: little height, so the head and the index step aside for the
-       picture. The ruler and the keys stay. */
-    @media (max-height: 500px) {
-      :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-head, .pl-index) {
-        display: none;
-      }
-
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
-        grid-template-rows: minmax(0, 1fr) auto auto;
-      }
-
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
-        grid-template-columns: minmax(0, 1fr);
-      }
-
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-ruler {
-        padding-top: 8px;
-      }
-    }
-
-    :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before {
-      aspect-ratio: auto;
-      height: 100%;
-      min-height: 120px;
-    }
-
-    @container pl (width >= 760px) {
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-index {
-        overflow-y: auto;
-      }
-    }
-
-    /* Upright fullscreen: the picture keeps 16:9 and the plate centres on the screen, so the
-       registration marks frame the picture and not a column of black. */
-    @media (orientation: portrait) {
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-plate {
-        align-content: center;
-        grid-template-rows: auto auto auto auto;
-      }
-
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-body {
-        grid-template-rows: auto auto;
-      }
-
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-stage::before {
-        aspect-ratio: 16 / 9;
-        height: auto;
+    @media (prefers-reduced-motion: reduce) {
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-index,
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-index[data-open] {
+        transition: none;
       }
     }
 

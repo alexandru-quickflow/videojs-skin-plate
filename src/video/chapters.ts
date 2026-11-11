@@ -28,7 +28,8 @@ function activeIndex(cues: readonly Cue[], time: number): number {
 /**
  * The chapter index beside the video: one numbered button per chapter cue, the current one marked, and a click
  * jumps there. Video.js has no chapter navigation control yet, so this reads the chapter cues from the player store.
- * Hidden when the media has fewer than two chapters.
+ * Hidden when the media has fewer than two chapters. In fullscreen the index is a panel: the Index key in the row
+ * opens it, and its close key, a chapter, Escape or leaving fullscreen close it.
  */
 class ChaptersElement extends UIElement {
   #tracks = new PlayerController(this, playerContext, selectTextTrack);
@@ -47,6 +48,70 @@ class ChaptersElement extends UIElement {
 
     // The hotkey coordinator already leaves Space and Enter on a focused button alone.
     this.addEventListener('click', this.#onClick, { signal });
+    this.#wirePanel(signal);
+  }
+
+  /** The index, its Index key in the row and its close key, for the fullscreen panel. */
+  #panel() {
+    const index = this.closest<HTMLElement>('.pl-index');
+    const container = this.closest<HTMLElement>('.pl');
+    return {
+      index,
+      container,
+      toggle: container?.querySelector<HTMLButtonElement>('.pl-btn-index') ?? null,
+      close: index?.querySelector<HTMLButtonElement>('.pl-index-close') ?? null,
+    };
+  }
+
+  #wirePanel(signal: AbortSignal): void {
+    const { index, container, toggle, close } = this.#panel();
+    if (!index || !container) return;
+    index.id ||= `pl-index-${Math.random().toString(36).slice(2, 8)}`;
+    toggle?.setAttribute('aria-controls', index.id);
+    toggle?.addEventListener('click', () => this.#setOpen(index.dataset.open === undefined), { signal });
+    close?.addEventListener('click', () => this.#setOpen(false), { signal });
+    // Escape reaches the page only where the browser doesn't spend it on leaving fullscreen.
+    index.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key !== 'Escape' || index.dataset.open === undefined) return;
+        event.stopPropagation();
+        this.#setOpen(false);
+      },
+      { signal }
+    );
+    // Leaving fullscreen folds the panel away, so it isn't open next time.
+    const onFullscreen = () =>
+      requestAnimationFrame(() => {
+        if (!container.matches(':fullscreen, [data-fullscreen]')) this.#setOpen(false, false);
+      });
+    document.addEventListener('fullscreenchange', onFullscreen, { signal });
+    document.addEventListener('webkitfullscreenchange', onFullscreen, { signal });
+    const watch = new MutationObserver(onFullscreen);
+    watch.observe(container, { attributes: true, attributeFilter: ['data-fullscreen'] });
+    signal.addEventListener('abort', () => watch.disconnect());
+  }
+
+  /** Open or close the fullscreen panel. Focus goes in with it, and back to the Index key when it closes. */
+  #setOpen(open: boolean, moveFocus = true): void {
+    const { index, toggle } = this.#panel();
+    if (!index) return;
+    if (open === (index.dataset.open !== undefined)) return;
+    const hadFocus = index.contains(document.activeElement);
+    index.toggleAttribute('data-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    if (!moveFocus) return;
+    if (open) {
+      requestAnimationFrame(() => {
+        const target =
+          index.querySelector<HTMLButtonElement>('.pl-chapter[data-active]') ??
+          index.querySelector<HTMLButtonElement>('.pl-chapter');
+        target?.focus({ preventScroll: true });
+        target?.scrollIntoView({ block: 'nearest' });
+      });
+    } else if (hadFocus) {
+      toggle?.focus();
+    }
   }
 
   override disconnectedCallback(): void {
@@ -219,6 +284,8 @@ class ChaptersElement extends UIElement {
     if (!button || !this.contains(button)) return;
     const start = Number(button.dataset.start);
     if (Number.isFinite(start)) void this.#time.value?.seek(start + 0.01);
+    // In fullscreen the panel has done its job once a chapter is chosen.
+    this.#setOpen(false);
   };
 }
 

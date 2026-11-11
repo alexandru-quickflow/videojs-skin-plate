@@ -37,6 +37,7 @@
 </div>
 <nav class="pl-index">
 <media-text class="pl-label pl-index-label" token="pl.index">Index</media-text>
+<button type="button" class="pl-btn pl-index-close"><span aria-hidden="true">&times;</span><media-text class="pl-visually-hidden" token="pl.close">Close</media-text></button>
 <pl-chapters class="pl-chapters"></pl-chapters>
 </nav>
 </div>
@@ -188,6 +189,8 @@
 </media-audio-track-radio-group>
 </media-menu-content>
 </media-menu>
+<!-- Index: opens the chapter index as a panel in fullscreen (chapters.ts). -->
+<button type="button" class="pl-btn pl-btn-index" aria-expanded="false"><media-text token="pl.index">Index</media-text></button>
 <media-airplay-button class="pl-btn pl-btn-glyph-key pl-btn-airplay">
 <span class="pl-btn-glyph" aria-hidden="true"><media-icon family="pl" name="airplay" class="pl-icon"></media-icon></span>
 </media-airplay-button>
