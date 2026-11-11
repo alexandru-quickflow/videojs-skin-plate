@@ -308,11 +308,11 @@
       box-shadow: 0 0 8px color-mix(in srgb, var(--pl-teal) 60%, transparent);
     }
 
-    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word {
+    :scope:is([data-failed], :has(.pl-dialog.pl-dialog[data-open])) .pl-status-word {
       color: var(--pl-hot);
     }
 
-    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word::before {
+    :scope:is([data-failed], :has(.pl-dialog.pl-dialog[data-open])) .pl-status-word::before {
       background: var(--pl-hot);
     }
 
@@ -410,7 +410,7 @@
       content: var(--plate-word-ended, var(--pl-w-ended));
     }
 
-    :scope:has(.pl-dialog.pl-dialog[data-open]) .pl-status-word::after {
+    :scope:is([data-failed], :has(.pl-dialog.pl-dialog[data-open])) .pl-status-word::after {
       content: var(--plate-word-error, var(--pl-w-error));
     }
 
@@ -791,6 +791,11 @@
       line-height: 1.2;
       letter-spacing: -0.005em;
       overflow-wrap: break-word;
+    }
+
+    /* A Latin name in a right-to-left index still lines up on the index's start edge. */
+    .pl-chapter:dir(rtl) .pl-chapter-title {
+      text-align: right;
     }
 
     @container pl (width < 760px) {
@@ -2029,6 +2034,11 @@
       letter-spacing: 0.08em;
     }
 
+    /* The bitrate Video.js adds when two renditions share a height, after the tier. */
+    .pl-menu-tier + .pl-menu-tier {
+      margin-inline-start: 8px;
+    }
+
     .pl-menu-tier[hidden] {
       display: none;
     }
@@ -2219,12 +2229,10 @@
       position: absolute;
       inset: auto 0 0;
       z-index: 1;
-      height: min(340px, 50%);
+      height: min(400px, 60%);
       pointer-events: none;
       background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--pl-ink) 88%, transparent));
-      transition:
-        opacity 200ms ease-out,
-        visibility 0s linear 0s;
+      transition: opacity 200ms ease-out;
     }
 
     /* The picture fills the screen behind everything. */
@@ -2254,9 +2262,7 @@
     :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-head, .pl-ruler, .pl-foot) {
       position: relative;
       z-index: 2;
-      transition:
-        opacity 200ms ease-out,
-        visibility 0s linear 0s;
+      transition: opacity 200ms ease-out;
     }
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-head {
@@ -2264,7 +2270,12 @@
       margin: calc(var(--pl-pad) * -1) calc(var(--pl-pad) * -1) 0;
       padding: var(--pl-pad) var(--pl-pad) 40px;
       border-bottom: 0;
-      background: linear-gradient(to bottom, color-mix(in srgb, var(--pl-ink) 70%, transparent), transparent);
+      background: linear-gradient(to bottom, color-mix(in srgb, var(--pl-ink) 85%, transparent), transparent);
+    }
+
+    /* Over bright footage the shade alone is not enough for small type. */
+    :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-head, .pl-time, .pl-ruler-mark) {
+      text-shadow: 0 0 6px var(--pl-ink), 0 1px 2px var(--pl-ink);
     }
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-ruler {
@@ -2275,18 +2286,22 @@
       grid-row: 4;
     }
 
-    /* Idle: the overlay fades, then leaves the way of pointer and screen reader alike. */
-    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) {
+    /* Idle: the overlay fades and lets the pointer through. It stays while the index is open or a
+       key has keyboard focus. Only opacity: hiding it outright would blur the focused key and take
+       the hotkeys with it. */
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open], :focus-visible)) {
       cursor: none;
     }
 
-    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) :is(.pl-head, .pl-ruler, .pl-foot),
-    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open])) .pl-plate::before {
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open], :focus-visible)) :is(.pl-head, .pl-ruler, .pl-foot),
+    :scope:is(:fullscreen, [data-fullscreen]):not([data-controls-visible]):not(:has(.pl-index[data-open], :focus-visible)) .pl-plate::before {
       opacity: 0;
-      visibility: hidden;
-      transition:
-        opacity 200ms ease-out,
-        visibility 0s linear 200ms;
+      pointer-events: none;
+    }
+
+    /* While the overlay is held, captions keep clear of it (Video.js lifts them only while it shows the controls). */
+    :scope:is(:fullscreen, [data-fullscreen]):has(.pl-index[data-open], :focus-visible) {
+      --media-caption-track-y: var(--media-caption-controls-y);
     }
 
     /* The index: a panel over the side of the picture, opened by the Index key. It stops above the
@@ -2337,6 +2352,8 @@
 
     :scope:is(:fullscreen, [data-fullscreen]) .pl-index-close {
       display: inline-flex;
+      font-size: 22px;
+      line-height: 1;
     }
 
     /* The Index key: in fullscreen, when there are chapters to list. */

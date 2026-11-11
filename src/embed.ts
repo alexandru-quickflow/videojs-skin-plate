@@ -10,7 +10,11 @@ import { cssString } from './css-string';
 
 export interface PlateOptions {
   /** A Mux stream URL (https://stream.mux.com/<playback-id>.m3u8) or any HLS/MP4 URL. */
-  src: string;
+  src?: string;
+  /** A Mux playback ID, instead of `src`. */
+  playbackId?: string;
+  /** The JWT for a signed Mux playback ID. */
+  token?: string;
   poster?: string;
   title?: string;
   /** A WebVTT chapters file; each cue becomes an entry in the index and a mark on the ruler. */
@@ -54,6 +58,10 @@ const oneOf = <T extends string>(list: readonly T[], value: unknown, name: strin
  * To remove it, empty the host (`host.replaceChildren()`): the skin's elements clean up when disconnected.
  */
 export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElement {
+  const src = options.playbackId
+    ? `https://stream.mux.com/${encodeURIComponent(options.playbackId)}.m3u8` +
+      (options.token ? `?token=${encodeURIComponent(options.token)}` : '')
+    : options.src;
   const player = document.createElement('video-player');
   if (options.poster) player.setAttribute('poster', options.poster);
   if (options.title) player.setAttribute('content-title', options.title);
@@ -64,7 +72,7 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   player.innerHTML = template.replace(
     MEDIA_PLACEHOLDER,
     // Without a src the media stays idle, so a page can mount first and set the source later.
-    `<mux-video${options.src ? ` src="${attr(options.src)}"` : ''} playsinline crossorigin>${track}</mux-video>`
+    `<mux-video${src ? ` src="${attr(src)}"` : ''} playsinline crossorigin>${track}</mux-video>`
   );
 
   // Options: the theme and properties go on the player, the layout switches on the skin's container.

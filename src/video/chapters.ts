@@ -1,6 +1,8 @@
 import {
   PlayerController,
   playerContext,
+  selectError,
+  selectSource,
   selectTextTrack,
   selectTime,
   UIElement,
@@ -292,15 +294,23 @@ class ChaptersElement extends UIElement {
 /**
  * Numbered chapter markers on the ruler: 01, 02, 03 above the tick where each chapter starts.
  * Decorative (the slider and the index carry the meaning), so it is aria-hidden.
+ *
+ * It also marks the player data-failed while the source that failed is still the source. Closing the
+ * error dialog clears the store's error, but the video still won't play, so the head keeps saying so.
  */
 class RulerMarksElement extends UIElement {
   #tracks = new PlayerController(this, playerContext, selectTextTrack);
   #time = new PlayerController(this, playerContext, selectTime);
+  #error = new PlayerController(this, playerContext, selectError);
+  #source = new PlayerController(this, playerContext, selectSource);
+  #failedSrc: string | null = null;
+  #hadError = false;
   #signature = '';
   #current = -2;
 
   override update(changed: PropertyValues): void {
     super.update(changed);
+    this.#markFailed();
     const cues = (this.#tracks.value?.chaptersCues ?? []) as readonly Cue[];
     // Live streams report an infinite duration: no fixed positions to mark.
     const raw = this.#time.value?.duration ?? 0;
@@ -324,6 +334,30 @@ class RulerMarksElement extends UIElement {
       this.append(mark);
     });
     this.#markActive(cues);
+  }
+
+  #markFailed(): void {
+    const player = this.closest<HTMLElement>('.pl');
+    const src = this.#source.value?.currentSrc ?? '';
+    const hasError = Boolean(this.#error.value?.error);
+    if (hasError) this.#failedSrc = src;
+    else if (this.#failedSrc !== src) this.#failedSrc = null;
+    player?.toggleAttribute('data-failed', this.#failedSrc !== null);
+    // The dialog was dismissed. Video.js returns focus to what had it before the error; when nothing
+    // had, focus would land on the page, so it goes to Play once the dialog lets go of the player
+    // (inert until its closing transition ends).
+    const play = player?.querySelector<HTMLElement>('.pl-controls > .pl-btn-play');
+    if (this.#hadError && !hasError && play) {
+      let frames = 60;
+      const settle = (): void => {
+        const active = document.activeElement;
+        if (active !== document.body && !active?.closest('.pl-dialog')) return;
+        if (play.closest('[inert]') && --frames > 0) requestAnimationFrame(settle);
+        else play.focus();
+      };
+      requestAnimationFrame(settle);
+    }
+    this.#hadError = hasError;
   }
 
   #markActive(cues: readonly Cue[]): void {

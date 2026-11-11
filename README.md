@@ -79,7 +79,7 @@ writes `dist-embed/plate-embed.js` and `plate-embed.css`, a single module with V
 const { mountPlate } = await import('/plate/plate-embed.js');
 
 const player = mountPlate(document.querySelector('#reel'), {
-  src: 'https://stream.mux.com/PLAYBACK_ID.m3u8',
+  playbackId: 'PLAYBACK_ID', // or src: any HLS or MP4 URL
   poster: 'https://image.mux.com/PLAYBACK_ID/thumbnail.webp',
   chapters: '/chapters.vtt',
   title: 'Showreel',
@@ -87,11 +87,11 @@ const player = mountPlate(document.querySelector('#reel'), {
 });
 ```
 
-The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` (any status word, and `detail` for the ruler's preview) and `style: { '--plate-accent': '#ff6b00' }`.
+A signed Mux playback ID takes its JWT as `token`. The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` (any status word, and `detail` for the ruler's preview) and `style: { '--plate-accent': '#ff6b00' }`.
 
 Values that aren't one of the listed options are ignored, with a warning in the console. To remove the player, empty the host with `host.replaceChildren()`.
 
-Pass `src: ''` to mount the player first and set the source later with `player.querySelector('mux-video').setAttribute('src', url)`. quickflow.dev does this so streaming starts after its opening animation.
+Leave out `src` and `playbackId` to mount the player first and set the source later with `player.querySelector('mux-video').setAttribute('src', url)`. quickflow.dev does this so streaming starts after its opening animation.
 
 ## Develop
 
