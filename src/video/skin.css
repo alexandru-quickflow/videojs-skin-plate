@@ -2287,6 +2287,46 @@
       white-space: nowrap;
     }
 
+    /* ------------------------------------------------------------------ Scrollbars */
+
+    /* Menus, the index and the error dialog scroll behind a hairline, like the chapter strip.
+       Chromium and Safari draw it from the ::-webkit-scrollbar rules, which they ignore while
+       scrollbar-width or scrollbar-color is set, so both are reset there; Firefox keeps its thin one. */
+    @supports selector(::-webkit-scrollbar) {
+      .pl-menu,
+      .pl-index,
+      .pl-dialog {
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+    }
+
+    .pl-menu::-webkit-scrollbar,
+    .pl-index::-webkit-scrollbar,
+    .pl-dialog::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .pl-menu::-webkit-scrollbar-button,
+    .pl-index::-webkit-scrollbar-button,
+    .pl-dialog::-webkit-scrollbar-button {
+      display: none;
+    }
+
+    .pl-menu::-webkit-scrollbar-track,
+    .pl-index::-webkit-scrollbar-track,
+    .pl-dialog::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .pl-menu::-webkit-scrollbar-thumb,
+    .pl-index::-webkit-scrollbar-thumb,
+    .pl-dialog::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background: var(--pl-line-strong);
+    }
+
     /* ------------------------------------------------------------------ Preferences */
 
     @media (prefers-reduced-motion: reduce) {
