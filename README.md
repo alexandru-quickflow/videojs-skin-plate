@@ -101,9 +101,9 @@ npm install
 npm run dev
 ```
 
-The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction, theme and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar&theme=blueprint`. It's live at [plate.quickflow.dev](https://plate.quickflow.dev/), with test sources (and a field for your own video), every public property (colours, fonts, words) and the layout switches, a Download CSS button for your theme, a live accessibility readout (contrast and control names for the current settings), and a "Use it on your site" guide whose code loads the embed from `/embed/` there. `npm run build:site` builds the workbench with the embed beside it.
+The workbench plays NASA's Cosmic Dawn trailer from Mux, with chapters. Its options panel sets the width, aspect ratio, color scheme, text direction, theme and language; the settings live in the URL, such as `/?width=384&ratio=9:16&dir=rtl&locale=ar&theme=blueprint`. It's live at [plate.quickflow.dev](https://plate.quickflow.dev/), with test sources (and a field for your own video), every public property (colours, fonts, words) and the layout switches, a Download CSS button for your theme, a live accessibility readout (contrast and control names for the current settings), and a "Use it on your site" guide whose code loads the embed and Plate's fonts from `/embed/` there. `npm run build:site` builds the workbench with the embed beside it.
 
-`npm run typecheck` checks the types, and `npm run deploy` deploys the workbench to Vercel, Netlify or Cloudflare Pages.
+`npm run typecheck` checks the types, `npm test` checks what a shared workbench link can put into the player and the code it hands out, and `npm run deploy` deploys the workbench to Vercel, Netlify or Cloudflare Pages.
 
 ## License
 
