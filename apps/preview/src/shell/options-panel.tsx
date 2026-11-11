@@ -64,6 +64,8 @@ const DIRECTION_LABELS: Record<TextDirection, string> = {
 
 const SOURCE_LABELS: Record<Source, string> = {
   chapters: 'Chapters and captions',
+  'many-chapters': 'Twelve chapters',
+  'long-titles': 'Long chapter titles',
   'one-chapter': 'One chapter',
   'no-chapters': 'No chapters',
   error: 'Broken stream',

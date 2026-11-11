@@ -18,7 +18,7 @@ export const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 export type Theme = (typeof THEMES)[number];
 
 /** What the preview plays: the trailer with chapters, the edge cases, and a stream that fails. */
-export const SOURCES = ['chapters', 'one-chapter', 'no-chapters', 'error', 'custom'] as const;
+export const SOURCES = ['chapters', 'many-chapters', 'long-titles', 'one-chapter', 'no-chapters', 'error', 'custom'] as const;
 export type Source = (typeof SOURCES)[number];
 
 export const INDEX_PLACES = ['end', 'start', 'none'] as const;

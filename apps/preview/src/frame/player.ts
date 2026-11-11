@@ -16,9 +16,14 @@ const BROKEN_SRC = 'https://stream.mux.com/not-a-playback-id.m3u8';
 // Tracks served from `apps/preview/public`.
 const CHAPTERS = '<track kind="chapters" label="English" srclang="en" src="./cosmic-dawn-chapters.vtt" default>';
 const ONE_CHAPTER = '<track kind="chapters" label="English" srclang="en" src="./one-chapter.vtt" default>';
+// More chapters than the index has room to show frames for, and titles that have to wrap or break.
+const MANY_CHAPTERS = '<track kind="chapters" label="English" srclang="en" src="./many-chapters.vtt" default>';
+const LONG_TITLES = '<track kind="chapters" label="English" srclang="en" src="./long-titles.vtt" default>';
 
 const TRACKS: Record<Exclude<Source, 'custom'>, string> = {
   chapters: CHAPTERS,
+  'many-chapters': MANY_CHAPTERS,
+  'long-titles': LONG_TITLES,
   'one-chapter': ONE_CHAPTER,
   'no-chapters': '',
   error: CHAPTERS,
