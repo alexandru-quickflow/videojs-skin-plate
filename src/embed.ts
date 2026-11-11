@@ -11,10 +11,10 @@ import { cssString } from './css-string';
 export interface PlateOptions {
   /** A Mux stream URL (https://stream.mux.com/<playback-id>.m3u8) or any HLS/MP4 URL. */
   src?: string;
-  /** A Mux playback ID, instead of `src`. */
+  /** A Mux playback ID, instead of `src`. Its poster comes from Mux unless `poster` is given. */
   playbackId?: string;
-  /** The JWT for a signed Mux playback ID. */
-  token?: string;
+  /** JWTs for a signed playback ID: one for the stream, and one each for the poster and the storyboard frames. */
+  tokens?: { playback?: string; thumbnail?: string; storyboard?: string };
   poster?: string;
   title?: string;
   /** A WebVTT chapters file; each cue becomes an entry in the index and a mark on the ruler. */
@@ -44,6 +44,7 @@ const attr = (value: string): string =>
 
 const THEMES = ['night', 'blueprint', 'signal', 'auto'] as const;
 const INDEXES = ['end', 'start', 'none'] as const;
+const RULERS = ['dense', 'sparse'] as const;
 const STATES = ['ready', 'playing', 'paused', 'loading', 'ended', 'error', 'detail'] as const;
 
 const oneOf = <T extends string>(list: readonly T[], value: unknown, name: string): T | undefined => {
@@ -58,12 +59,18 @@ const oneOf = <T extends string>(list: readonly T[], value: unknown, name: strin
  * To remove it, empty the host (`host.replaceChildren()`): the skin's elements clean up when disconnected.
  */
 export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElement {
-  const src = options.playbackId
-    ? `https://stream.mux.com/${encodeURIComponent(options.playbackId)}.m3u8` +
-      (options.token ? `?token=${encodeURIComponent(options.token)}` : '')
-    : options.src;
+  const id = options.playbackId;
+  const tokens = options.tokens ?? {};
+  // A playback ID goes in as Mux's structured source (below), which carries the image tokens a signed
+  // asset needs for its poster and storyboard; a stream URL could only carry the playback token.
+  const src = id ? '' : options.src;
+  const poster =
+    options.poster ??
+    (id &&
+      `https://image.mux.com/${encodeURIComponent(id)}/thumbnail.webp` +
+        (tokens.thumbnail ? `?token=${encodeURIComponent(tokens.thumbnail)}` : ''));
   const player = document.createElement('video-player');
-  if (options.poster) player.setAttribute('poster', options.poster);
+  if (poster) player.setAttribute('poster', poster);
   if (options.title) player.setAttribute('content-title', options.title);
 
   const track = options.chapters
@@ -83,8 +90,11 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   if (container) {
     const index = oneOf(INDEXES, options.index, 'index');
     if (index && index !== 'end') container.dataset.index = index;
-    if (options.ruler === 'sparse') container.dataset.ruler = 'sparse';
+    if (oneOf(RULERS, options.ruler, 'ruler') === 'sparse') container.dataset.ruler = 'sparse';
     if (options.head === false) container.dataset.head = 'none';
+    else if (options.head !== undefined && options.head !== true) {
+      console.warn(`Plate: head must be true or false; got ${String(options.head)}.`);
+    }
   }
   // Strings in custom properties are read by `content`, so they go in as CSS strings.
   if (options.number !== undefined && options.number !== '') {
@@ -103,10 +113,20 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   i18n.append(player);
   host.replaceChildren(i18n);
 
-  if (options.autoplay) {
+  if (id || options.autoplay) {
     void customElements.whenDefined('mux-video').then(() => {
-      const media = player.querySelector('mux-video') as (HTMLElement & { play?: () => Promise<void> }) | null;
-      void media?.play?.().catch(() => undefined);
+      const media = player.querySelector('mux-video') as
+        | (HTMLElement & { play?: () => Promise<void>; source?: unknown })
+        | null;
+      if (media && id) {
+        media.source = {
+          playbackId: id,
+          playback: { token: tokens.playback },
+          poster: { token: tokens.thumbnail },
+          storyboard: { token: tokens.storyboard },
+        };
+      }
+      if (options.autoplay) void media?.play?.().catch(() => undefined);
     });
   }
 

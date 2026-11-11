@@ -548,7 +548,9 @@
       background: color-mix(in srgb, var(--pl-ink) 40%, transparent);
     }
 
-    .pl-buffering:not([data-visible]) {
+    /* A source that failed isn't loading anything: no arc until Play tries it again. */
+    .pl-buffering:not([data-visible]),
+    :scope[data-failed] .pl-buffering {
       display: none;
     }
 
@@ -646,8 +648,10 @@
     }
 
     @container pl (width >= 760px) {
+      /* No padding at the foot: a list a few pixels too long would scroll for nothing. When more
+         chapters wait below, the last line fades (chapters.ts sets data-below). */
       .pl-index {
-        padding: var(--pl-bezel) 0 var(--pl-bezel) var(--pl-gap);
+        padding: var(--pl-bezel) 0 0 var(--pl-gap);
         border-top: 0;
         border-inline-start: 1px solid var(--pl-line);
         margin-inline-start: var(--pl-gap);
@@ -656,6 +660,10 @@
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: var(--pl-line-strong) transparent;
+      }
+
+      :scope:not(:fullscreen, [data-fullscreen]) .pl-index[data-below] {
+        mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
       }
     }
 
@@ -732,9 +740,16 @@
         }
       }
 
+      /* A chip is never wider than the strip: a long name ends in an ellipsis (its full text stays
+         the button's name), so the playing chip can always be scrolled fully into view. */
       .pl-chapter-list > li {
         flex: 0 0 auto;
+        max-width: 100%;
         scroll-snap-align: start;
+      }
+
+      .pl-chapter-list > li > .pl-chapter {
+        max-width: 100%;
       }
     }
 
@@ -819,6 +834,8 @@
       .pl-chapter-title {
         font-size: 16px;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -858,7 +875,8 @@
     .pl-index[data-tight] .pl-chapter:not([data-active]) .pl-chapter-thumb {
       height: 0 !important;
       margin-top: 0;
-      box-shadow: none;
+      /* Beats the playing chapter's ring, which would draw a line where no frame is. */
+      box-shadow: none !important;
       opacity: 0;
     }
 
@@ -905,7 +923,8 @@
 
     .pl-chapter:focus-visible {
       outline: 2px solid var(--pl-teal);
-      outline-offset: 2px;
+      /* Inside the button: the index scrolls, and would cut a ring drawn outside it. */
+      outline-offset: -2px;
     }
 
     .pl-chapter[data-active] {
@@ -1783,6 +1802,21 @@
       }
     }
 
+    /* The narrowest players can't fit the timecode and the keys on one row: the keys take their own,
+       starting with Play like every wider row, and the head keeps the status word without its label. */
+    @container pl (width < 480px) {
+      .pl-controls {
+        flex-basis: 100%;
+        margin-inline-start: 0;
+      }
+    }
+
+    @container pl (width < 420px) {
+      .pl-status > media-text {
+        display: none;
+      }
+    }
+
     /* Below 1000px the keys always take a row of their own, under the timecode. Left to wrap on its
        own, the row would fold only when the volume slider opens, and move Mute from under the pointer. */
     @container pl (600px <= width < 1000px) {
@@ -2367,11 +2401,34 @@
       background: var(--pl-line-soft);
     }
 
-    /* Narrow fullscreen (a phone held upright): no room for a panel; the ruler marks the chapters. */
+    /* Narrow fullscreen (a phone held upright): no room for a side panel, so the index opens as a band
+       above the keys, the chapter strip small players already have. It rises into place. */
     @container pl (width < 760px) {
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-index,
-      :scope:is(:fullscreen, [data-fullscreen]) .pl-btn-index {
-        display: none !important;
+      :scope:is(:fullscreen, [data-fullscreen]) :is(.pl-index, .pl-index:dir(rtl)) {
+        inset-block: auto var(--pl-fs-controls);
+        inset-inline: 0;
+        width: auto;
+        padding: 12px var(--pl-pad);
+        border: 0;
+        border-block: 1px solid var(--pl-line-strong);
+        border-radius: 0;
+        contain: none;
+        overflow: visible;
+        opacity: 0;
+        translate: 0 12px;
+        transition:
+          translate 250ms var(--pl-ease),
+          opacity 250ms var(--pl-ease),
+          visibility 0s linear 250ms;
+      }
+
+      :scope:is(:fullscreen, [data-fullscreen]) .pl-index[data-open] {
+        opacity: 1;
+        translate: 0 0;
+        transition:
+          translate 250ms var(--pl-ease),
+          opacity 250ms var(--pl-ease),
+          visibility 0s linear 0s;
       }
     }
 
@@ -2426,7 +2483,7 @@
 
       :scope[data-index="start"] .pl-index {
         order: -1;
-        padding: var(--pl-bezel) var(--pl-gap) var(--pl-bezel) 0;
+        padding: var(--pl-bezel) var(--pl-gap) 0 0;
         border-inline-start: 0;
         border-inline-end: 1px solid var(--pl-line);
         margin-inline: 0 var(--pl-gap);

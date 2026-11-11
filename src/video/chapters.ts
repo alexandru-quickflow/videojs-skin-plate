@@ -72,6 +72,7 @@ class ChaptersElement extends UIElement {
     toggle?.setAttribute('aria-controls', index.id);
     toggle?.addEventListener('click', () => this.#setOpen(index.dataset.open === undefined), { signal });
     close?.addEventListener('click', () => this.#setOpen(false), { signal });
+    index.addEventListener('scroll', this.#markBelow, { passive: true, signal });
     // Escape reaches the page only where the browser doesn't spend it on leaving fullscreen.
     index.addEventListener(
       'keydown',
@@ -204,6 +205,14 @@ class ChaptersElement extends UIElement {
     if (index.dataset.settled === undefined) requestAnimationFrame(() => (index.dataset.settled = ''));
   };
 
+  /** Marks the index column while chapters wait below its foot, for the fade. */
+  #markBelow = (): void => {
+    const index = this.closest<HTMLElement>('.pl-index');
+    if (!index) return;
+    const end = index.scrollHeight - index.clientHeight;
+    index.toggleAttribute('data-below', end > 1 && index.scrollTop < end - 1);
+  };
+
   /** Marks the strip while chips wait past its end, for the fade. */
   #markMore = (): void => {
     const list = this.#list;
@@ -274,6 +283,7 @@ class ChaptersElement extends UIElement {
     this.#resize = new ResizeObserver(() => {
       this.#markMore();
       this.#fit();
+      this.#markBelow();
     });
     this.#resize.observe(list);
     const index = this.closest<HTMLElement>('.pl-index');
@@ -313,6 +323,44 @@ class RulerMarksElement extends UIElement {
   #hadError = false;
   #signature = '';
   #current = -2;
+  #disconnect: AbortController | null = null;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.#disconnect?.abort();
+    this.#disconnect = new AbortController();
+    // Capture, so it runs before the play key's own toggle, which Enter and Space reach without a click.
+    const player = this.closest('.pl');
+    const { signal } = this.#disconnect;
+    player?.addEventListener('click', this.#retry, { capture: true, signal });
+    player?.addEventListener(
+      'keydown',
+      (event) => {
+        if ((event as KeyboardEvent).key === 'Enter' || (event as KeyboardEvent).key === ' ') this.#retry(event);
+      },
+      { capture: true, signal }
+    );
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+    this.#disconnect?.abort();
+    this.#disconnect = null;
+  }
+
+  /** Play on a source that failed tries it again, as the error's hint says, instead of waiting on it forever. */
+  #retry = (event: Event): void => {
+    if (this.#failedSrc === null || !(event.target as Element).closest?.('.pl-btn-play')) return;
+    const player = this.closest<HTMLElement>('.pl');
+    const media = player?.querySelector<HTMLMediaElement>('.pl-stage > :first-child:not(.pl-poster)');
+    if (typeof media?.load !== 'function') return;
+    event.stopPropagation();
+    event.preventDefault();
+    this.#failedSrc = null;
+    player?.removeAttribute('data-failed');
+    media.load();
+    void media.play?.()?.catch(() => undefined);
+  };
 
   override update(changed: PropertyValues): void {
     super.update(changed);
@@ -381,6 +429,23 @@ class RulerMarksElement extends UIElement {
  */
 class OverflowElement extends HTMLElement {
   #resize: ResizeObserver | null = null;
+
+  constructor() {
+    super();
+    // A resize that hides the focused item (its setting moves onto the row) drops focus on the page.
+    // Put it back on the More key, or on Play when More is gone too. A click elsewhere moves focus
+    // to something visible, or leaves the item visible, so it is left alone.
+    this.addEventListener('focusout', (event) => {
+      const lost = event.target as HTMLElement;
+      if (event.relatedTarget) return;
+      requestAnimationFrame(() => {
+        if (document.activeElement !== document.body || lost.checkVisibility()) return;
+        const key = this.querySelector<HTMLElement>('.pl-btn-more');
+        const target = key?.checkVisibility() ? key : this.closest('.pl')?.querySelector<HTMLElement>('.pl-controls > .pl-btn-play');
+        target?.focus();
+      });
+    });
+  }
 
   connectedCallback(): void {
     this.#link();

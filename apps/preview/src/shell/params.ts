@@ -350,12 +350,12 @@ export const EMBED_BASE = 'https://plate.quickflow.dev/embed/';
 /** The whole block a site builder's HTML or Embed element takes: fonts, styles and the player. */
 export function embedSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
-  // A Mux playback ID is what Mux shows; the poster comes from the same ID. Your own link replaces both.
+  // A Mux playback ID is what Mux shows, and mountPlate takes the poster from it. Your own link replaces it.
   const ownLink = custom && value.customSrc;
   const options = [
     ...(ownLink
       ? [`    src: ${js(ownLink)},`]
-      : ['    playbackId: id,', '    poster: `https://image.mux.com/${id}/thumbnail.webp`,']),
+      : ["    playbackId: 'YOUR_PLAYBACK_ID',"]),
     `    chapters: ${js((custom && value.customChapters) || 'YOUR_CHAPTERS_LINK')},`,
     `    title: "My video",`,
   ];
@@ -372,7 +372,6 @@ export function embedSnippet(value: WorkbenchParams): string {
     `<link rel="stylesheet" href="${EMBED_BASE}plate-embed.css">`,
     '<script type="module">',
     `  import { mountPlate } from '${EMBED_BASE}plate-embed.js';`,
-    ...(ownLink ? [] : ["  const id = 'YOUR_PLAYBACK_ID';"]),
     "  mountPlate(document.getElementById('plate-player'), {",
     ...options,
     '  });',

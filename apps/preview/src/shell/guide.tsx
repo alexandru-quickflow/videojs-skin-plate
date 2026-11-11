@@ -46,8 +46,8 @@ export function Guide({ params }: { params: WorkbenchParams }) {
             </p>
             <p>
               Not on Mux? A direct link to an .mp4 file works too. In the code from step 2, replace{' '}
-              <code className="bg-muted rounded px-1">playbackId: id</code> with <code className="bg-muted rounded px-1">src: 'your link'</code> and delete the{' '}
-              <code className="bg-muted rounded px-1">poster</code> line.
+              <code className="bg-muted rounded px-1">playbackId: 'YOUR_PLAYBACK_ID'</code> with{' '}
+              <code className="bg-muted rounded px-1">src: 'your link'</code>.
             </p>
           </Step>
 

@@ -28,6 +28,8 @@ The skin is HTML, CSS and three small custom elements: two built on Video.js `UI
 - `core.ts`: registers the UI elements, icons and strings; `skin.ts` adds the fonts
 - `src/styles/`: the Video.js scaffold base and preferences the skin builds on, which `core.ts` imports
 
+It needs `@videojs/html` 10.3.0 and `@phosphor-icons/core`, plus `@fontsource/newsreader` and `@fontsource/jetbrains-mono` for the fonts `skin.ts` loads. `core.ts` imports the icons as text with Vite's `?raw` suffix; with another bundler, give `.svg` files a raw-text loader.
+
 ## Customise it
 
 ### Themes
@@ -85,17 +87,16 @@ writes `dist-embed/plate-embed.js` and `plate-embed.css`, a single module with V
 const { mountPlate } = await import('/plate/plate-embed.js');
 
 const player = mountPlate(document.querySelector('#reel'), {
-  playbackId: 'PLAYBACK_ID', // or src: any HLS or MP4 URL
-  poster: 'https://image.mux.com/PLAYBACK_ID/thumbnail.webp',
+  playbackId: 'PLAYBACK_ID', // or src: any HLS or MP4 URL; with an ID the poster comes from Mux
   chapters: '/chapters.vtt',
   title: 'Showreel',
   autoplay: true,
 });
 ```
 
-A signed Mux playback ID takes its JWT as `token`. The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` (any status word, and `detail` for the ruler's preview) and `style: { '--plate-accent': '#ff6b00' }`.
+A signed Mux playback ID takes its JWTs as `tokens: { playback, thumbnail, storyboard }`, so the poster and the chapter frames load too. The same options are there in the embed: `theme`, `number`, `index`, `ruler`, `head: false`, `words: { playing: 'On air' }` (any status word, and `detail` for the ruler's preview) and `style: { '--plate-accent': '#ff6b00' }`.
 
-Values that aren't one of the listed options are ignored, with a warning in the console. To remove the player, empty the host with `host.replaceChildren()`.
+Values that aren't one of the listed options are ignored, with a warning in the console. To remove the player, empty the host with `host.replaceChildren()`. To move it, mount a new one with `mountPlate`: a `<video-player>` taken out of the page and put back doesn't start again.
 
 Leave out `src` and `playbackId` to mount the player first and set the source later with `player.querySelector('mux-video').setAttribute('src', url)`. quickflow.dev does this so streaming starts after its opening animation.
 
