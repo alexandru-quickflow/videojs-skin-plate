@@ -826,6 +826,22 @@
         box-shadow var(--media-duration-fast) ease-out;
     }
 
+    /* Until Video.js has cut the frame out of the storyboard it shows the whole sheet, a strip as tall
+       as the plate. Hold a 16:9 box and keep the picture out until Video.js sizes the element
+       (its inline height), then fade it in. */
+    .pl-chapter-thumb:not([style*="height"]) {
+      height: 52px;
+    }
+
+    .pl-chapter-thumb::part(image) {
+      opacity: 0;
+      transition: opacity var(--media-duration-fast) ease-out;
+    }
+
+    .pl-chapter-thumb[style*="height"]:not([data-loading], [data-error])::part(image) {
+      opacity: 1;
+    }
+
     .pl-chapter:is([data-active], :hover, :focus-visible) .pl-chapter-thumb {
       opacity: 1;
     }
