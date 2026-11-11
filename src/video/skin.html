@@ -1,6 +1,6 @@
 <media-container class="media-skin media-container media-video pl" data-theme="scaffold" data-preset="video">
 <div class="pl-plate">
-<div class="pl-head">
+<div class="pl-head" data-interactive>
 <span class="pl-tag"><span aria-hidden="true"><media-text token="pl.plate">Plate</media-text> <span class="pl-plate-number"></span> <span class="pl-dot">&middot;</span> </span><media-title class="pl-media-title"></media-title></span>
 <span class="pl-status" aria-hidden="true"><media-text token="pl.status">Status</media-text> <span class="pl-status-word"></span></span>
 </div>
@@ -35,13 +35,13 @@
 </media-status-indicator>
 </div>
 </div>
-<nav class="pl-index">
+<nav class="pl-index" data-interactive>
 <media-text class="pl-label pl-index-label" token="pl.index">Index</media-text>
 <button type="button" class="pl-btn pl-index-close"><span aria-hidden="true">&times;</span><media-text class="pl-visually-hidden" token="pl.close">Close</media-text></button>
 <pl-chapters class="pl-chapters"></pl-chapters>
 </nav>
 </div>
-<div class="pl-ruler">
+<div class="pl-ruler" data-interactive>
 <media-time-slider class="pl-time-slider" thumb-alignment="edge">
 <pl-ruler-marks class="pl-ruler-marks" aria-hidden="true"></pl-ruler-marks>
 <media-time-slider-chapters class="pl-time-slider-chapters">
@@ -73,7 +73,7 @@
 </media-slider-preview>
 </media-time-slider>
 </div>
-<div class="pl-foot">
+<div class="pl-foot" data-interactive>
 <media-time-group class="pl-time">
 <media-time class="pl-time-current" type="current" toggle>
 </media-time>
@@ -333,11 +333,7 @@
 </media-hotkey>
 <media-hotkey keys="i" action="togglePictureInPicture">
 </media-hotkey>
-<media-gesture type="tap" action="togglePaused" pointer="mouse" region="center">
-</media-gesture>
-<media-gesture type="tap" action="togglePaused" pointer="touch" region="center" data-pl-touch="inline">
-</media-gesture>
-<media-gesture type="tap" action="toggleControls" pointer="touch" data-pl-touch="fullscreen" disabled>
+<media-gesture type="tap" action="togglePaused">
 </media-gesture>
 <media-gesture type="doubletap" action="seekStep" region="left">
 </media-gesture>
