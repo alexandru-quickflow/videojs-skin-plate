@@ -39,18 +39,30 @@ export function Guide({ params }: { params: WorkbenchParams }) {
         </SheetHeader>
 
         <ol className="grid gap-6 px-4 pb-8">
-          <Step number={1} title="Get a link to your video">
+          <Step number={1} title="Get your video's playback ID">
             <p>
-              Upload the video to Mux and copy its stream link. It looks like{' '}
-              <code className="bg-muted rounded px-1">https://stream.mux.com/….m3u8</code>. A direct link to an .mp4
-              file works too.
+              Upload the video to Mux. In the Mux dashboard, open Video, then Assets, and click your video. Copy its
+              Playback ID, a string of letters and numbers. The ID has to be public; a signed one won't play.
+            </p>
+            <p>
+              Not on Mux? A direct link to an .mp4 file works too. In the code from step 2, replace{' '}
+              <code className="bg-muted rounded px-1">playbackId: id</code> with <code className="bg-muted rounded px-1">src: 'your link'</code> and delete the{' '}
+              <code className="bg-muted rounded px-1">poster</code> line.
             </p>
           </Step>
 
           <Step number={2} title="Copy the code">
             <p>
-              It already has the theme, colours and layout you picked here. Put your video link where it says{' '}
-              <code className="bg-muted rounded px-1">YOUR_VIDEO_LINK</code>.
+              It already has the theme, colours and layout you picked here.{' '}
+              {params.source === 'custom' && params.customSrc ? (
+                <>It plays the video link you gave the workbench.</>
+              ) : (
+                <>
+                  Put your playback ID where it says <code className="bg-muted rounded px-1">YOUR_PLAYBACK_ID</code>. The picture people see before
+                  they press play comes from Mux on its own.
+                </>
+              )}{' '}
+              Put your video's name where it says <code className="bg-muted rounded px-1">My video</code>.
             </p>
             <Copyable code={embedSnippet(params)} label="Copy code" />
           </Step>
@@ -63,17 +75,31 @@ export function Guide({ params }: { params: WorkbenchParams }) {
                 </li>
               ))}
             </ul>
+            <p>
+              Some plans remove code that runs a script, and then nothing shows. On WordPress.com you need a plan that
+              allows plugins. On Squarespace, the cheapest plan won't run it.
+            </p>
             <p>Publish the page, and the player shows your video.</p>
           </Step>
 
           <Step number={4} title="Chapters (optional)">
             <p>
               For the chapter index, make a text file called chapters.vtt like the one below. Each chapter is a start
-              time, an end time and a name. Upload it to your own site, for example to the media library, and put its
-              link where it says <code className="bg-muted rounded px-1">YOUR_CHAPTERS_LINK</code>. With no chapters,
-              delete that line.
+              time, an end time and a name. Times are hours:minutes:seconds.milliseconds, so 00:01:10.000 is one minute
+              and ten seconds. Upload it to your own site, for example to the media library, and put its link where it
+              says <code className="bg-muted rounded px-1">YOUR_CHAPTERS_LINK</code>. If the site won't take a .vtt
+              file, ask whoever runs it to allow that file type. With no chapters, delete that line.
             </p>
             <Copyable code={CHAPTERS_EXAMPLE} label="Copy example" />
+          </Step>
+
+          <Step number={5} title="If the player doesn't show">
+            <ul className="grid list-disc gap-1 ps-5">
+              <li>Look at the published page, not the editor's preview.</li>
+              <li>Check that the ID or link was pasted whole, with no spaces.</li>
+              <li>Check that your plan allows code with a script (step 3).</li>
+              <li>On Mux, check that the playback ID is public.</li>
+            </ul>
           </Step>
         </ol>
       </SheetContent>

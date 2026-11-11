@@ -343,8 +343,12 @@ export const EMBED_BASE = 'https://staging.plate-skin.pages.dev/embed/';
 /** The whole block a site builder's HTML or Embed element takes: fonts, styles and the player. */
 export function embedSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
+  // A Mux playback ID is what Mux shows; the poster comes from the same ID. Your own link replaces both.
+  const ownLink = custom && value.customSrc;
   const options = [
-    `    src: ${JSON.stringify((custom && value.customSrc) || 'YOUR_VIDEO_LINK')},`,
+    ...(ownLink
+      ? [`    src: ${JSON.stringify(ownLink)},`]
+      : ['    playbackId: id,', '    poster: `https://image.mux.com/${id}/thumbnail.webp`,']),
     `    chapters: ${JSON.stringify((custom && value.customChapters) || 'YOUR_CHAPTERS_LINK')},`,
     `    title: "My video",`,
   ];
@@ -361,6 +365,7 @@ export function embedSnippet(value: WorkbenchParams): string {
     `<link rel="stylesheet" href="${EMBED_BASE}plate-embed.css">`,
     '<script type="module">',
     `  import { mountPlate } from '${EMBED_BASE}plate-embed.js';`,
+    ...(ownLink ? [] : ["  const id = 'YOUR_PLAYBACK_ID';"]),
     "  mountPlate(document.getElementById('plate-player'), {",
     ...options,
     '  });',
