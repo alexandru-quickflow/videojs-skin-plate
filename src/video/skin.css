@@ -1290,7 +1290,7 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
       /* Three groups: playback, volume, display. Tight inside a group, a hairline between. */
       gap: 2px;
       min-width: 0;
@@ -1443,7 +1443,7 @@
     }
 
     /* Audio on the row only on the widest players; elsewhere it waits in More's menu on phones. */
-    @container pl (width < 1360px) {
+    @container pl (width < 1680px) {
       .pl-controls > .pl-btn-audio,
       .pl-btn-audio-menu {
         display: none !important;
@@ -1464,7 +1464,7 @@
       display: none;
     }
 
-    @container pl (600px <= width < 1360px) {
+    @container pl (600px <= width < 1680px) {
       .pl-btn-mute .pl-only-narrow,
       .pl-captions-glyph,
       .pl-quality-glyph {
@@ -1545,47 +1545,68 @@
       translate: -50% 0;
     }
 
-    /* Volume: the mute word plus a small scale, drawn like the ruler: a tick every tenth, tall ones at
-       0, 50 and 100, a line for the level and a readout in percent while it moves. */
+    /* Volume: the mute key plus a slider that stays folded until the pointer rests on the key or
+       focus reaches the slider, then opens to the right. A plain line, filled to the level, with a
+       round knob. Touch screens can't hover, so there it stays open. */
     .pl-volume {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
     }
 
     .pl-volume-slider {
       position: relative;
       display: flex;
       align-items: center;
-      width: clamp(56px, 7.5cqi, 88px);
+      width: 0;
       height: 44px;
-      /* Room for the level line at the scale's ends. */
-      margin-inline: 8px 6px;
+      margin-inline: 0;
+      opacity: 0;
       cursor: pointer;
       touch-action: none;
       direction: ltr;
     }
 
-    .pl-volume-scale {
-      position: absolute;
-      inset-inline: 0;
-      top: 14px;
-      height: 9px;
-      background:
-        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 0 0 / 1px 100% no-repeat,
-        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 50% 0 / 1px 100% no-repeat,
-        linear-gradient(var(--pl-line-strong), var(--pl-line-strong)) 100% 0 / 1px 100% no-repeat,
-        repeating-linear-gradient(90deg, var(--pl-line-strong) 0 1px, transparent 1px 10%) 0 100% / calc(100% + 1px) 4px no-repeat;
-      pointer-events: none;
+    .pl-volume:is(:hover, :has(:focus-visible)) .pl-volume-slider,
+    .pl-volume-slider[data-dragging] {
+      /* Room for the knob at the line's ends. */
+      width: clamp(52px, 6cqi, 72px);
+      margin-inline: 8px 10px;
+      opacity: 1;
+    }
+
+    @media (hover: none) {
+      .pl-volume-slider {
+        width: clamp(52px, 6cqi, 72px);
+        margin-inline: 8px 10px;
+        opacity: 1;
+      }
+    }
+
+    /* The free space of the row sits after the volume, as on most players: playback and volume on
+       one side, display keys on the other. The slider opens into that space, so nothing before it
+       moves under the pointer. */
+    .pl-volume + .pl-sep {
+      margin-inline-start: auto;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .pl-volume-slider {
+        transition:
+          width var(--media-duration-fast, 150ms) ease-out,
+          margin var(--media-duration-fast, 150ms) ease-out,
+          opacity var(--media-duration-fast, 150ms) ease-out;
+      }
     }
 
     .pl-volume-track {
       position: absolute;
       inset-inline: 0;
-      top: 25px;
-      height: 2px;
+      top: 50%;
+      height: 3px;
+      border-radius: 2px;
       overflow: hidden;
       background: var(--pl-track);
+      translate: 0 -50%;
     }
 
     .pl-volume-fill {
@@ -1596,56 +1617,21 @@
       background: var(--pl-paper);
     }
 
-    /* The level: a line across the scale, like the playhead on the ruler. */
     .pl-volume-thumb {
       position: absolute;
-      top: 11px;
+      top: 50%;
       left: var(--media-slider-fill, 0%);
-      width: 2px;
-      height: 19px;
-      border-radius: 1px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
       background: var(--pl-paper);
-      box-shadow: 0 0 0 2px var(--pl-surface);
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       outline: none;
     }
 
     .pl-volume-thumb:focus-visible {
       outline: 2px solid var(--pl-teal);
-      outline-offset: 4px;
-    }
-
-    /* The readout, above the level while the slider is used: VOL and the percent. */
-    .pl-volume-readout {
-      position: absolute;
-      bottom: calc(100% - 4px);
-      left: var(--media-slider-fill, 0%);
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      padding: 4px 7px;
-      background: var(--pl-surface);
-      box-shadow: 0 0 0 1px var(--pl-line-strong);
-      font-family: var(--pl-mono);
-      font-size: 10.5px;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      color: var(--pl-paper);
-      font-variant-numeric: tabular-nums;
-      translate: -50% 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity var(--media-duration-fast) ease-out;
-    }
-
-    .pl-volume-readout::before {
-      content: var(--pl-w-vol, "VOL");
-      letter-spacing: 0.16em;
-      color: var(--pl-faint);
-    }
-
-    .pl-volume-slider:is([data-dragging], [data-pointing], :has(:focus-visible)) .pl-volume-readout {
-      opacity: 1;
+      outline-offset: 3px;
     }
 
     /* ------------------------------------------------------------------ Small players */
@@ -1741,9 +1727,17 @@
       }
     }
 
+    /* Below 1000px the keys always take a row of their own, under the timecode. Left to wrap on its
+       own, the row would fold only when the volume slider opens, and move Mute from under the pointer. */
+    @container pl (600px <= width < 1000px) {
+      .pl-controls {
+        flex-basis: 100%;
+      }
+    }
+
     /* More beyond phones: it keeps what the row has no room for, Quality below 1120px and Audio
-       below 1360px, and shows only when one of those is there to choose. Speed and Captions are on
-       the row from 600px, so their pages leave. From 1360px everything is on the row. */
+       below 1680px, and shows only when one of those is there to choose. Speed and Captions are on
+       the row from 600px, so their pages leave. From 1680px everything is on the row. */
     @container pl (600px <= width < 1120px) {
       .pl-overflow:has(.pl-menu-page[data-page="quality"]:not([hidden])) .pl-btn-more,
       .pl-overflow:has([data-page-for="audio"] media-menu-radio-item + media-menu-radio-item) .pl-btn-more {
@@ -1751,7 +1745,7 @@
       }
     }
 
-    @container pl (1120px <= width < 1360px) {
+    @container pl (1120px <= width < 1680px) {
       .pl-overflow:has([data-page-for="audio"] media-menu-radio-item + media-menu-radio-item) .pl-btn-more {
         display: grid;
       }
@@ -1777,7 +1771,7 @@
       }
     }
 
-    @container pl (width >= 1360px) {
+    @container pl (width >= 1680px) {
       .pl-more {
         display: none !important;
       }
@@ -1856,7 +1850,7 @@
     }
 
     /* The rendition in the key only when the row has room for it; the menu always shows it. */
-    @container pl (width < 1360px) {
+    @container pl (width < 1680px) {
       .pl-btn-captions .pl-btn-value,
       .pl-quality-value {
         display: none;
@@ -1864,7 +1858,7 @@
     }
 
     /* Until the row is that wide, Fullscreen is its corner glyph, as on phones. Its name stays. */
-    @container pl (600px <= width < 1360px) {
+    @container pl (600px <= width < 1680px) {
       .pl-btn-full .pl-only-narrow {
         display: grid;
       }
@@ -2212,7 +2206,7 @@
 
     /* Arabic is joined script: letter-spacing breaks the joins, so the spaced capitals of the
        mono labels go plain. */
-    :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn-text, .pl-indicator, .pl-tooltip, .pl-menu-item, .pl-volume-readout) {
+    :scope:lang(ar) :is(.pl-head, .pl-label, .pl-btn-text, .pl-indicator, .pl-tooltip, .pl-menu-item) {
       font-family: system-ui, "Noto Sans Arabic", "Segoe UI", sans-serif;
     }
 
@@ -2320,14 +2314,12 @@
       .pl-dialog,
       .pl-menu,
       .pl-tooltip,
-      .pl-volume-readout,
       .pl-time-slider-preview {
         border: 1px solid CanvasText;
       }
 
-      /* The tick that marks a menu's choice, and the scales' ticks, keep their shapes in system colours. */
+      /* The tick that marks a menu's choice, and the ruler's ticks, keep their shapes in system colours. */
       .pl-menu-item::before,
-      .pl-volume-scale,
       .pl-time-slider::before {
         forced-color-adjust: none;
       }
@@ -2369,6 +2361,7 @@
 
       .pl-time-slider-fill,
       .pl-volume-fill,
+      .pl-volume-thumb,
       .pl-time-slider-thumb::before,
       .pl-time-slider-thumb::after {
         forced-color-adjust: none;
