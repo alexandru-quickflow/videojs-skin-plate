@@ -338,7 +338,7 @@ export function codeSnippet(value: WorkbenchParams): string {
 }
 
 /** Where the deployed workbench serves the embed build (see apps/preview/stage-embed.mjs). */
-export const EMBED_BASE = 'https://staging.plate-skin.pages.dev/embed/';
+export const EMBED_BASE = 'https://plate.quickflow.dev/embed/';
 
 /** The whole block a site builder's HTML or Embed element takes: fonts, styles and the player. */
 export function embedSnippet(value: WorkbenchParams): string {
