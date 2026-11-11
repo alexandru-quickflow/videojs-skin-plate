@@ -108,8 +108,14 @@ class ChaptersElement extends UIElement {
         const target =
           index.querySelector<HTMLButtonElement>('.pl-chapter[data-active]') ??
           index.querySelector<HTMLButtonElement>('.pl-chapter');
-        target?.focus({ preventScroll: true });
-        target?.scrollIntoView({ block: 'nearest' });
+        if (!target) return;
+        target.focus({ preventScroll: true });
+        // Scroll the panel only: scrollIntoView would also scroll the player sideways to reach a panel
+        // still sliding in, and the picture would jump.
+        const t = target.getBoundingClientRect();
+        const i = index.getBoundingClientRect();
+        if (t.top < i.top) index.scrollTop += t.top - i.top;
+        else if (t.bottom > i.bottom) index.scrollTop += t.bottom - i.bottom;
       });
     } else if (hadFocus) {
       toggle?.focus();
