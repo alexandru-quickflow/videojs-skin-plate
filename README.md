@@ -2,11 +2,15 @@
 
 A Video.js v10 skin drawn like a technical plate: a numbered head with a status word, the picture framed by corner marks, a chapter index beside it, a ruler for a timeline and text keys underneath. It was made for the Video.js Skins Design Challenge on Contra, and it plays the showreel on [quickflow.dev](https://quickflow.dev).
 
+**[See it live](https://quickflow.dev/work/plate/)** · **[Try it in the workbench](https://plate.quickflow.dev/)**
+
+![The Plate player playing the second chapter of a showreel: a numbered head, the picture in corner marks, a chapter index beside it, a ruler timeline and word keys underneath.](https://quickflow.dev/work/plate/playing.jpg)
+
 ## What it does
 
 - **Chapter index.** One button per chapter cue, with its frame from the storyboard (`media-thumbnail`), the playing one in the accent colour. Click one and the video jumps there. Video.js has no chapter navigation control yet, so the `pl-chapters` element reads the chapter cues from the player store. It shows only when the media has two or more chapters. Below a 760px wide player it becomes a strip that scrolls with the video.
 - **Ruler.** The time slider carries a numbered mark where each chapter starts (`pl-ruler-marks`) and a playhead.
-- **Controls under the picture**, never over it, so they read the same on any footage. Controls the media or browser can't use, such as captions without a track, are left out.
+- **Controls under the picture** outside fullscreen, so they read the same on any footage. Controls the media or browser can't use, such as captions without a track, are left out.
 - **Fullscreen** is the picture edge to edge. The head, ruler and keys lie over it on a shade and fade while the video plays and nobody moves; a pointer, a key or a tap brings them back. An Index key opens the chapters as a side panel.
 - **Menus from Video.js.** Speed, Quality, Captions and Audio open Video.js menus of rates, renditions and tracks; Audio only shows when there are two tracks or more. AirPlay and Cast keys appear where a device can be reached. Under 600px the timecode shares a row with four icon keys: play, mute, fullscreen and More, a Video.js menu with a page each for speed, quality, captions and audio. Between 600 and 1680px More stays for what the row has no room for (Quality below 1120px, Audio below 1680px), and shows only when there is something to choose.
 - **Labels that match their names.** Visible words come from Video.js translations, and the word on a key is part of its accessible name; the speed key's name starts with it. The skin's own words are translated into German, French, Spanish, Romanian, Russian and Arabic; those six and English are the languages it supports.
@@ -15,13 +19,14 @@ A Video.js v10 skin drawn like a technical plate: a numbered head with a status 
 
 ## Use it
 
-The skin is HTML, CSS and three small custom elements: two built on Video.js `UIElement` and `PlayerController`, and one that gives the More menu's pages their ids. It isn't published to npm; copy the files in `src/video/` into your project:
+The skin is HTML, CSS and three small custom elements: two built on Video.js `UIElement` and `PlayerController`, and one that gives the More menu's pages their ids. It isn't published to npm; copy `src/video/` and `src/styles/` into your project, side by side:
 
 - `skin.html`: the markup inside `<video-player>`
 - `skin.css`: the styles, scoped to `.media-skin.pl`
 - `chapters.ts`: `pl-chapters`, `pl-ruler-marks` and `pl-overflow`
 - `i18n.ts`: the skin's strings and translation overrides
 - `core.ts`: registers the UI elements, icons and strings; `skin.ts` adds the fonts
+- `src/styles/`: the Video.js scaffold base and preferences the skin builds on, which `core.ts` imports
 
 ## Customise it
 

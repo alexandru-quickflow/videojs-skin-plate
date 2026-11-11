@@ -1,5 +1,4 @@
 import '@videojs/html/i18n';
-import '@/skin.css';
 import './preview.css';
 import { applySkinParams, playerStyles, type WorkbenchParams } from '../shell/params';
 import { applyMediaParams, initialParams, onParamsChange } from './frame';
