@@ -1584,9 +1584,13 @@
 
     /* The free space of the row sits after the volume, as on most players: playback and volume on
        one side, display keys on the other. The slider opens into that space, so nothing before it
-       moves under the pointer. */
+       moves under the pointer. The space parts the groups, so no hairline there. */
+    .pl-volume {
+      margin-inline-end: auto;
+    }
+
     .pl-volume + .pl-sep {
-      margin-inline-start: auto;
+      display: none;
     }
 
     @media (prefers-reduced-motion: no-preference) {
