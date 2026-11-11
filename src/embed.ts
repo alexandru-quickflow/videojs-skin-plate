@@ -79,7 +79,8 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   player.innerHTML = template.replace(
     MEDIA_PLACEHOLDER,
     // Without a src the media stays idle, so a page can mount first and set the source later.
-    `<mux-video${src ? ` src="${attr(src)}"` : ''} playsinline crossorigin>${track}</mux-video>`
+    // autoplay on the element: a play() call right after setting a playback ID would be cut off by its load.
+    `<mux-video${src ? ` src="${attr(src)}"` : ''}${options.autoplay ? ' autoplay' : ''} playsinline crossorigin>${track}</mux-video>`
   );
 
   // Options: the theme and properties go on the player, the layout switches on the skin's container.
@@ -113,12 +114,10 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
   i18n.append(player);
   host.replaceChildren(i18n);
 
-  if (id || options.autoplay) {
+  if (id) {
     void customElements.whenDefined('mux-video').then(() => {
-      const media = player.querySelector('mux-video') as
-        | (HTMLElement & { play?: () => Promise<void>; source?: unknown })
-        | null;
-      if (media && id) {
+      const media = player.querySelector('mux-video') as (HTMLElement & { source?: unknown }) | null;
+      if (media) {
         media.source = {
           playbackId: id,
           playback: { token: tokens.playback },
@@ -126,7 +125,6 @@ export function mountPlate(host: HTMLElement, options: PlateOptions): HTMLElemen
           storyboard: { token: tokens.storyboard },
         };
       }
-      if (options.autoplay) void media?.play?.().catch(() => undefined);
     });
   }
 

@@ -160,17 +160,24 @@ class ChaptersElement extends UIElement {
     });
 
     // In the horizontal strip on small players, keep the playing chapter in view.
-    // Measured on screen, so it holds in right-to-left too, and it never scrolls the page.
     const active = buttons[current];
-    const list = this.#list;
-    if (active && list && list.scrollWidth > list.clientWidth) {
-      const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-      const a = active.getBoundingClientRect();
-      const l = list.getBoundingClientRect();
-      if (a.left < l.left) list.scrollBy({ left: a.left - l.left - 16, behavior });
-      else if (a.right > l.right) list.scrollBy({ left: a.right - l.right + 16, behavior });
-    }
+    if (active) this.#reveal(active);
   }
+
+  /**
+   * Scroll the strip until a chip is wholly in view: the playing one, or one the keyboard reaches (the browser
+   * leaves a half-visible chip where it is). Measured on screen, so it holds in right-to-left too, and it
+   * never scrolls the page.
+   */
+  #reveal = (chip: Element): void => {
+    const list = this.#list;
+    if (!list || list.scrollWidth <= list.clientWidth) return;
+    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    const a = chip.getBoundingClientRect();
+    const l = list.getBoundingClientRect();
+    if (a.left < l.left) list.scrollBy({ left: a.left - l.left - 16, behavior });
+    else if (a.right > l.right) list.scrollBy({ left: a.right - l.right + 16, behavior });
+  };
 
   /**
    * In the index column, frames for every chapter may not fit beside the picture. Then only the playing
@@ -278,6 +285,7 @@ class ChaptersElement extends UIElement {
 
     const signal = this.#disconnect?.signal;
     list.addEventListener('scroll', this.#markMore, { passive: true, signal });
+    list.addEventListener('focusin', (event) => this.#reveal(event.target as Element), { signal });
     // Size changes (fullscreen, a turned phone, fonts arriving) move the end too.
     this.#resize?.disconnect();
     this.#resize = new ResizeObserver(() => {
@@ -329,17 +337,12 @@ class RulerMarksElement extends UIElement {
     super.connectedCallback();
     this.#disconnect?.abort();
     this.#disconnect = new AbortController();
-    // Capture, so it runs before the play key's own toggle, which Enter and Space reach without a click.
-    const player = this.closest('.pl');
-    const { signal } = this.#disconnect;
-    player?.addEventListener('click', this.#retry, { capture: true, signal });
-    player?.addEventListener(
-      'keydown',
-      (event) => {
-        if ((event as KeyboardEvent).key === 'Enter' || (event as KeyboardEvent).key === ' ') this.#retry(event);
-      },
-      { capture: true, signal }
-    );
+    // Every way of playing (the key, a hotkey, a tap, the API) ends in the media's play event.
+    this.#media()?.addEventListener('play', this.#retry, { signal: this.#disconnect.signal });
+  }
+
+  #media(): HTMLMediaElement | null {
+    return this.closest('.pl')?.querySelector<HTMLMediaElement>('.pl-stage > :first-child:not(.pl-poster)') ?? null;
   }
 
   override disconnectedCallback(): void {
@@ -348,16 +351,12 @@ class RulerMarksElement extends UIElement {
     this.#disconnect = null;
   }
 
-  /** Play on a source that failed tries it again, as the error's hint says, instead of waiting on it forever. */
-  #retry = (event: Event): void => {
-    if (this.#failedSrc === null || !(event.target as Element).closest?.('.pl-btn-play')) return;
-    const player = this.closest<HTMLElement>('.pl');
-    const media = player?.querySelector<HTMLMediaElement>('.pl-stage > :first-child:not(.pl-poster)');
-    if (typeof media?.load !== 'function') return;
-    event.stopPropagation();
-    event.preventDefault();
+  /** Playing a source that failed loads it again first, as the error's hint says, instead of waiting on it forever. */
+  #retry = (): void => {
+    const media = this.#media();
+    if (this.#failedSrc === null || typeof media?.load !== 'function') return;
     this.#failedSrc = null;
-    player?.removeAttribute('data-failed');
+    this.closest('.pl')?.removeAttribute('data-failed');
     media.load();
     void media.play?.()?.catch(() => undefined);
   };
@@ -396,6 +395,8 @@ class RulerMarksElement extends UIElement {
     const hasError = Boolean(this.#error.value?.error);
     if (hasError) this.#failedSrc = src;
     else if (this.#failedSrc !== src) this.#failedSrc = null;
+    // A source that fails stops: the key says Play and the announcer doesn't claim it plays.
+    if (hasError && !this.#hadError) this.#media()?.pause?.();
     player?.toggleAttribute('data-failed', this.#failedSrc !== null);
     // The dialog was dismissed. Video.js returns focus to what had it before the error; when nothing
     // had, focus would land on the page, so it goes to Play once the dialog lets go of the player

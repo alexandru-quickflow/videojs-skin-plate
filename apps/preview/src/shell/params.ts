@@ -332,7 +332,7 @@ export function onAccent(hexColor: string): string {
 export function codeSnippet(value: WorkbenchParams): string {
   const custom = value.source === 'custom';
   const lines: string[] = [
-    `  src: ${js((custom && value.customSrc) || 'https://stream.mux.com/PLAYBACK_ID.m3u8')},`,
+    custom && value.customSrc ? `  src: ${js(value.customSrc)},` : "  playbackId: 'PLAYBACK_ID',",
     `  chapters: ${js((custom && value.customChapters) || '/chapters.vtt')},`,
   ];
   if (value.theme !== 'night') lines.push(`  theme: '${value.theme}',`);

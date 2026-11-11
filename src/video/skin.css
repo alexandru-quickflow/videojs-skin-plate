@@ -1333,6 +1333,9 @@
     .pl-time-current {
       display: inline-flex;
       align-items: center;
+      /* The italic 7 is wider than the other figures, tabular or not: a box as wide as the widest time
+         under ten minutes (7:07, 3.7 zeros) keeps the keys after it from moving as the 7s come and go. */
+      min-width: calc(3.7ch + 12px);
       min-height: 44px;
       margin: -6px -6px;
       padding: 0 6px;

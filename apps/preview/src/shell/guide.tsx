@@ -42,7 +42,7 @@ export function Guide({ params }: { params: WorkbenchParams }) {
           <Step number={1} title="Get your video's playback ID">
             <p>
               Upload the video to Mux. In the Mux dashboard, open Video, then Assets, and click your video. Copy its
-              Playback ID, a string of letters and numbers. The ID has to be public; a signed one won't play.
+              Playback ID, a string of letters and numbers. Use a public ID; a signed one also needs its tokens, which the README explains.
             </p>
             <p>
               Not on Mux? A direct link to an .mp4 file works too. In the code from step 2, replace{' '}
