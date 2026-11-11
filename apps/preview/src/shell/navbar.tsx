@@ -23,7 +23,7 @@ export function Navbar({ previewUrl, optionsId, params }: NavbarProps) {
   return (
     <header className="border-border bg-background flex h-14 shrink-0 items-center gap-4 border-b px-4">
       <div className="flex min-w-0 items-center gap-2">
-        <svg viewBox="0 0 209 209" width="18" height="18" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <svg className="shrink-0" viewBox="0 0 209 209" width="18" height="18" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
           <path fill="#ffa81b" d="M0 0h209v209H0z" />
           <path fill="#ff6200" d="M0 80h209v129H0z" />
           <path fill="#eb3132" d="M0 142h209v67H0z" />
@@ -31,7 +31,7 @@ export function Navbar({ previewUrl, optionsId, params }: NavbarProps) {
           <path d="M167.09 104.5L65.13 169.81V39.19l101.96 65.31z" fill="#ebe4c1" />
         </svg>
         <h1 className="text-foreground truncate text-base font-semibold tracking-tight">{skin.name}</h1>
-        <Badge variant="outline">
+        <Badge variant="outline" className="hidden sm:inline-flex">
           {skin.frameworkLabel} · {skin.presetLabel}
         </Badge>
       </div>
